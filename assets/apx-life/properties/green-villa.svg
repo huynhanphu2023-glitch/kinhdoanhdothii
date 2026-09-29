@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Biệt thự Vườn Xanh</title>
+  <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#162b37"/><stop offset="1" stop-color="#53716b"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#sky)"/><circle cx="492" cy="76" r="28" fill="#ddc27f"/>
+  <path d="M0 277h640v83H0z" fill="#19292d"/><path d="m104 196 216-126 216 126v87H104z" fill="#344b50" stroke="#a0a28b" stroke-width="3"/>
+  <path d="m85 198 235-145 235 145-15 15L320 74 100 213z" fill="#a98e61"/>
+  <path d="M144 209h111v74H144zM278 177h83v106h-83zM384 209h111v74H384z" fill="#9bbcb2"/>
+  <path d="M296 225h47v58h-47z" fill="#d6bc78"/><path d="M54 277h532" stroke="#d6bc78" stroke-width="3" opacity=".7"/>
+  <g fill="#42665a"><circle cx="74" cy="241" r="35"/><circle cx="566" cy="238" r="39"/></g>
+</svg>
