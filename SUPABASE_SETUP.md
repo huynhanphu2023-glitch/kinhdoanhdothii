@@ -25,11 +25,13 @@ Các migration này dành cho project APX đã kiểm tra. Ảnh đại diện t
 
 ## APXBank
 
-APXBank lưu số dư ngân hàng, tiết kiệm, khoản vay, điểm tín dụng, giao dịch và thông báo trong cùng `game_state` của tài khoản hiện có; không tạo tài khoản đăng nhập hoặc bảng save mới. Ví tiền cá nhân trong game vẫn là ví riêng: nạp/rút chuyển tiền thật giữa ví đó và APXBank. Tài sản lấy từ hồ sơ nhân vật; nợ vay cập nhật `character.debt`. Tiết kiệm đáo hạn và kỳ trả nợ dùng hook chốt ngày hiện tại của game (15 phút một ngày), không có bộ đếm riêng.
+APXBank lưu số dư ngân hàng, tiết kiệm, khoản vay, điểm tín dụng, giao dịch và thông báo trong cùng `game_state` của tài khoản hiện có; không tạo tài khoản đăng nhập hoặc bảng save mới. Ví cá nhân vẫn tách biệt: nạp/rút chuyển tiền giữa ví và APXBank, còn lương ca làm được chuyển thẳng vào APXBank. Tài sản lấy từ hồ sơ nhân vật; nợ vay cập nhật `character.debt`. Tiết kiệm đáo hạn và kỳ trả nợ dùng hook chốt ngày hiện tại của game (15 phút một ngày), không có bộ đếm riêng.
 
 Để bật chuyển tiền APXBank giữa hai người chơi, chạy `supabase/migrations/202610020001_apx_bank_transfers.sql` trong SQL Editor của đúng Supabase project sau migration nền `202609270001_apx_player_platform.sql`. RPC xác thực người gửi, tìm người nhận bằng UUID nhân vật, khóa hai bản save, kiểm tra số dư và ghi hai phía cùng lịch sử/thông báo trong một transaction. Không cấp quyền client ghi trực tiếp bảng idempotency. Nếu migration chưa chạy, các chức năng tài khoản, nạp/rút, tiết kiệm và vay vẫn lưu trong game save; chuyển liên người chơi sẽ báo migration chưa sẵn sàng.
 
 Đã áp dụng `supabase/migrations/202610020002_apx_game_save_wallet_debits.sql` lên project `kinhdoanhdothi`. Hàm lưu save hiện cho phép khoản trừ tiền đi qua ví/ledger máy chủ, nhưng không chấp nhận số dư tăng do client gửi; tiền tăng phải đến từ giao dịch máy chủ đã xác thực.
+
+Để nhận lương trực tiếp vào APXBank, chạy `js/supabase/migrations/202610030001_apx_bank_career_salary.sql` trong SQL Editor của cùng Supabase project. Hàm xác nhận kết quả ca đã lưu, giới hạn mức trả, ghi số dư/lịch sử/thông báo nguyên tử và dùng ID ca để chống cộng lương trùng khi thử lại. Nếu chưa chạy migration, lương sẽ hiện là đang chờ và có nút thử lại trong kết quả ca; không được báo đã chuyển thành công.
 
 Kiểm tra sau khi migration: đăng nhập hai tài khoản A/B, nạp tiền ở A, chuyển tới `character_id` của B, kiểm tra số dư/lịch sử/thông báo của cả hai rồi tải lại cả hai tài khoản. Gửi lại cùng yêu cầu sau lỗi mạng không được trừ tiền lần hai. Thử chuyển thiếu số dư, UUID không tồn tại và chuyển cho chính mình; tất cả phải bị từ chối. Những kiểm tra này cần project Supabase thật và chưa được thực hiện chỉ bằng kiểm tra cục bộ.
 
