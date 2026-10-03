@@ -1567,7 +1567,7 @@ window.APXPages = window.APXPages || {};
   };
   window.APXPages.career = function (page, state) {
     ensureState(state);
-    if (page === "quests" && window.APXQuest) return window.APXQuest.render(state);
+    if (page === "quests" && window.APXQuest) return window.APXQuest.render(state);     if (page === "lawyer-cases" && window.APXLawyerCases) return window.APXLawyerCases.render(state);
     if (page === "current") return currentJobPage(state);
     if (page === "contract") {
       var career = ensureState(state), contract = career.employment.pending || career.employment.current;
