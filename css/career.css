@@ -188,6 +188,7 @@
 .apx-quest-card .progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--apx-teal),var(--apx-gold)); }
 .apx-quest-reward { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; color: var(--apx-muted); font-size: 10px; }
 .apx-quest-reward strong { color: var(--apx-gold-bright); }
+.apx-quest-claim { min-height: 28px; flex: 0 0 auto; padding: 5px 11px; font-size: 10px; }
 .nav-area-card.is-locked { color: var(--apx-muted); background: rgba(255,255,255,.015); }
 .nav-area-card.is-locked .icon { color: var(--apx-muted); }
 .nav-area-lock-note { display: block; margin-top: 3px; color: var(--apx-muted); font-size: 8px; }
