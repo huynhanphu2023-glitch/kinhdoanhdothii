@@ -136,7 +136,7 @@ window.APXPages = window.APXPages || {};
     var issue = validateCase(caseData);
     if (issue) return window.APXGame.toast(issue, "warning");
     var lawyer = lawyerState(state);
-    if (!lawyer.joined) return window.APXGame.toast("Hãy nhận nghề Luật sư trước khi tiếp nhận hồ sơ.", "warning");
+    if (!state.career || !state.career.activeJob || state.career.activeJob.type !== "lawyer") return window.APXGame.toast("Hãy bắt đầu ca Luật sư trong Công việc hiện tại trước.", "warning");
     if (lawyer.cases[caseData.id] && lawyer.cases[caseData.id].status === "completed") {
       lawyer.selectedCaseId = caseData.id;
       return persistAndRender();
@@ -150,7 +150,7 @@ window.APXPages = window.APXPages || {};
     persistAndRender("Đã tiếp nhận hồ sơ " + caseData.meta.shortTitle + ".");
   }
 
-  function chooseAnswer(caseData, questionId, choiceId) {
+  function startCareerCase(state) { if (!state || !state.career || !state.career.activeJob || state.career.activeJob.type !== "lawyer") return false; var lawyer = lawyerState(state); var active = lawyer.activeCaseId && findCase(lawyer.activeCaseId); if (active && lawyer.cases[active.id] && lawyer.cases[active.id].status === "active") return true; var caseData = getCases().find(function (item) { return item && !lawyer.cases[item.id]; }) || getCases()[0]; if (!caseData) { window.APXGame.toast("Chưa có hồ sơ vụ án nào được đăng ký.", "warning"); return false; } lawyer.cases[caseData.id] = createProgress(caseData, state.day); lawyer.activeCaseId = caseData.id; lawyer.selectedCaseId = null; return true; } function chooseAnswer(caseData, questionId, choiceId) {
     var state = gameState(), lawyer = state && lawyerState(state);
     var progress = lawyer && lawyer.cases[caseData.id];
     if (!progress || progress.status !== "active") return;
@@ -247,14 +247,14 @@ window.APXPages = window.APXPages || {};
     lawyer.activeCaseId = null;
     lawyer.selectedCaseId = caseData.id;
     lawyer.completedCases += 1;
-    lawyer.xp += xp;
+    lawyer.xp += 0;
     lawyer.reputation = Math.max(-100, Math.min(100, lawyer.reputation + reputationChange));
-    state.cash = Math.max(0, Number(state.cash) || 0) + reward;
+    ;
     if (state.career) {
-      state.career.xp = Math.max(0, Number(state.career.xp) || 0) + xp;
+      ;
       if (window.APXCareer && window.APXCareer.getLevel) state.career.level = window.APXCareer.getLevel(state);
     }
-    persistAndRender("Vụ án đã kết thúc. Kết quả và phần thưởng đã được ghi nhận.");
+    if (!window.APXCareer || typeof window.APXCareer.finishLawyerCase !== "function") { progress.status = "active"; lawyer.activeCaseId = caseData.id; lawyer.completedCases = Math.max(0, lawyer.completedCases - 1); return window.APXGame.toast("Hệ thống việc làm chưa sẵn sàng để bàn giao ca Luật sư.", "warning"); } var careerResult = window.APXCareer.finishLawyerCase(state, score); if (!careerResult) { progress.status = "active"; lawyer.activeCaseId = caseData.id; lawyer.completedCases = Math.max(0, lawyer.completedCases - 1); lawyer.reputation = Math.max(-100, Math.min(100, lawyer.reputation - reputationChange)); return; } progress.result.reward = Math.max(0, Number(careerResult.pay) || 0); progress.result.xp = Math.max(0, Number(careerResult.xp) || 0); lawyer.xp += progress.result.xp; persistAndRender("Vụ án đã kết thúc. Kết quả và phần thưởng đã được ghi nhận.");
   }
 
   function renderCaseList(state) {
@@ -345,7 +345,7 @@ window.APXPages = window.APXPages || {};
       '<section class="lawyer-case-consequence"><strong>Hậu quả vụ án</strong><p>' + escapeHTML(result.description) + '</p><small>Danh tiếng thay đổi ' + impactText + '. Kết quả đã được lưu vào tiến trình nghề Luật sư.</small></section></section>';
   }
 
-  function render(state) {
+  function render(state) { var lawyer = lawyerState(state), selectedCase = findCase(lawyer.selectedCaseId), selectedProgress = selectedCase && lawyer.cases[selectedCase.id]; return '<header class="page-heading"><span class="eyebrow">NGHỀ NGHIỆP · LUẬT SƯ</span><h1>Mini-game xử lý hồ sơ</h1><p>Ứng tuyển và bắt đầu ca Luật sư trong Công việc hiện tại để xử lý hồ sơ.</p></header><section class="panel lawyer-case-guidance"><a class="button button-gold" href="#" data-action="page" data-section="career" data-page="jobs">Tìm việc Luật sư</a> <a class="button" href="#" data-action="page" data-section="career" data-page="current">Công việc hiện tại</a></section>' + (selectedCase && selectedProgress && selectedProgress.status === "completed" ? renderResult(selectedCase, selectedProgress, lawyer) : "");
     var lawyer = lawyerState(state);
     var cases = getCases();
     var activeCase = findCase(lawyer.activeCaseId);
@@ -364,7 +364,7 @@ window.APXPages = window.APXPages || {};
     return content;
   }
 
-  function applyLibraryFilter(input) {
+  function renderShift(state) { var lawyer = lawyerState(state), caseData = findCase(lawyer.activeCaseId), progress = caseData && lawyer.cases[caseData.id]; if (!caseData || !progress || progress.status !== "active") return '<header class="page-heading"><span class="eyebrow">CA LÀM · LUẬT SƯ</span><h1>Không tìm thấy hồ sơ đang xử lý</h1><p>Quay lại Công việc hiện tại để kiểm tra ca làm.</p></header>'; return '<header class="page-heading"><span class="eyebrow">CA LÀM · TRỢ LÝ LUẬT SƯ</span><h1>' + escapeHTML(caseData.meta.title) + '</h1><p>Đọc hồ sơ, chứng cứ và giải quyết tình huống để hoàn thành ca.</p></header><section class="panel lawyer-case-career"><span>⚖️ ' + escapeHTML(state.career.activeJob.employer) + '</span><span>Tiến độ tình huống ' + (progress.currentQuestion + 1) + '/' + caseData.questions.length + '</span></section>' + renderWorkspace(caseData, progress); } function renderCareerResult(state) { var lawyer = lawyerState(state), caseData = findCase(lawyer.selectedCaseId), progress = caseData && lawyer.cases[caseData.id]; return caseData && progress && progress.status === "completed" ? renderResult(caseData, progress, lawyer) : ""; } function applyLibraryFilter(input) {
     var query = String(input.value || "").trim().toLocaleLowerCase("vi-VN");
     var cards = document.querySelectorAll(".lawyer-case-laws [data-law-case-law]");
     var visible = 0;
@@ -427,6 +427,6 @@ window.APXPages = window.APXPages || {};
 
   window.APXLawyerCases = {
     ensureState: lawyerState,
-    render: render
+    render: render, startCareerCase: startCareerCase, renderShift: renderShift, renderCareerResult: renderCareerResult
   };
 })();
