@@ -33,6 +33,8 @@ APXBank lưu số dư ngân hàng, tiết kiệm, khoản vay, điểm tín dụ
 
 Để nhận lương trực tiếp vào APXBank, chạy `js/supabase/migrations/202610030001_apx_bank_career_salary.sql` trong SQL Editor của cùng Supabase project. Hàm xác nhận kết quả ca đã lưu, giới hạn mức trả, ghi số dư/lịch sử/thông báo nguyên tử và dùng ID ca để chống cộng lương trùng khi thử lại. Nếu chưa chạy migration, lương sẽ hiện là đang chờ và có nút thử lại trong kết quả ca; không được báo đã chuyển thành công.
 
+Để nhận tiền thưởng nhiệm vụ trong tài khoản đăng nhập, chạy tiếp `js/supabase/migrations/202610030002_apx_quest_claim_reward.sql`. RPC chỉ trả thưởng cho nhiệm vụ nghề nghiệp đã hoàn thành, khóa mỗi nhiệm vụ theo user để chống cộng trùng, và cập nhật ví cùng EXP trong save trên máy chủ. Bản lưu cũ đã nhận EXP tự động sẽ chỉ nhận thêm tiền nhiệm vụ, không cộng EXP lần hai. Không có migration này, APX sẽ báo lỗi rõ ràng khi nhận thưởng trên tài khoản đăng nhập; save cục bộ vẫn nhận thưởng bình thường.
+
 Kiểm tra sau khi migration: đăng nhập hai tài khoản A/B, nạp tiền ở A, chuyển tới `character_id` của B, kiểm tra số dư/lịch sử/thông báo của cả hai rồi tải lại cả hai tài khoản. Gửi lại cùng yêu cầu sau lỗi mạng không được trừ tiền lần hai. Thử chuyển thiếu số dư, UUID không tồn tại và chuyển cho chính mình; tất cả phải bị từ chối. Những kiểm tra này cần project Supabase thật và chưa được thực hiện chỉ bằng kiểm tra cục bộ.
 
 ## Hệ thống đầu tư APX
