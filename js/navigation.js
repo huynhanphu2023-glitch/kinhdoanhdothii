@@ -12,7 +12,7 @@ window.APX_NAVIGATION = [
     pages: [
       { id: "current", label: "Công việc hiện tại" },
       { id: "jobs", label: "Tìm việc" },
-      { id: "contract", label: "Hợp đồng" },
+      { id: "contract", label: "Hợp đồng" },       { id: "lawyer-cases", label: "Hồ sơ luật sư" },
       { id: "quests", label: "Nhiệm vụ cá nhân" }
     ]
   },
@@ -141,7 +141,7 @@ window.APX_NAV_AREAS = [
     icon: "icon-grid",
     cards: [
       { section: "career", page: "current", label: "Công việc hiện tại", icon: "icon-users" },
-      { section: "career", page: "jobs", label: "Tìm việc", icon: "icon-users" },
+      { section: "career", page: "jobs", label: "Tìm việc", icon: "icon-users" },       { section: "career", page: "lawyer-cases", label: "Hồ sơ luật sư", icon: "icon-users" },
       { section: "character", page: "profile", label: "Hồ sơ cá nhân", icon: "icon-users" },
       { section: "character", page: "skills", label: "Kỹ năng", icon: "icon-chart" },
       { section: "character", page: "assets", label: "Tài sản", icon: "icon-coins" },
