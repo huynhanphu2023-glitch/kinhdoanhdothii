@@ -22,12 +22,12 @@ window.APXPages = window.APXPages || {};
   var EMPLOYERS = {
     sales: ["Minh Phát Retail", "Thiên Hà Electronics", "An Thịnh Mart", "Sao Mai Trading"],
     warehouse: ["APX Logistics", "Bình Minh Distribution", "Khang Vận Global", "Kho vận Đại Nam"],
-    chef: ["Bếp Nhà An Nhiên", "Phố Nướng", "Lantern Dining", "Bếp Mùa Vui"]
+    chef: ["Bếp Nhà An Nhiên", "Phố Nướng", "Lantern Dining", "Bếp Mùa Vui"], lawyer: ["Văn phòng Luật An Tín", "Công ty Luật Minh Chính", "Văn phòng Pháp lý Đại Việt"]
   };
   var JOBS = {
     sales: { title: "Nhân viên bán hàng", icon: "🛍️", basePay: 500000, bonusPay: 500000, skill: "negotiation", skillName: "Đàm phán", shift: "Đón và tư vấn khách theo nhịp hoạt động của cửa hàng." },
     warehouse: { title: "Nhân viên kho", icon: "📦", basePay: 550000, bonusPay: 450000, skill: "analysis", skillName: "Phân tích", shift: "Nhận, ưu tiên và soạn các đơn giao phát sinh." },
-    chef: { title: "Đầu bếp", icon: "🍳", basePay: 600000, bonusPay: 400000, skill: "business", skillName: "Kinh doanh", shift: "Nấu các món theo ticket khách gọi trong ngày." }
+    chef: { title: "Đầu bếp", icon: "🍳", basePay: 600000, bonusPay: 400000, skill: "business", skillName: "Kinh doanh", shift: "Nấu các món theo ticket khách gọi trong ngày." }, lawyer: { title: "Trợ lý luật sư", icon: "⚖️", basePay: 600000, bonusPay: 400000, skill: "analysis", skillName: "Phân tích", shift: "Nghiên cứu hồ sơ, kiểm tra chứng cứ và xử lý tình huống pháp lý." }
   };
   var salaryPaymentsInFlight = Object.create(null);
   // Career roles are data records so new jobs and branches can be added without
@@ -48,7 +48,7 @@ window.APXPages = window.APXPages || {};
     chef_cook: { jobId: "chef_cook", jobName: "Nhân viên bếp", type: "chef", salary: 680000, careerLevel: 2, skillRequirements: { business: 2 }, promotionRequirements: { xp: 250, shifts: 2, performance: 60, reputation: 1, tenure: 2 }, nextJobs: ["chef_head"], gameplayType: "chef", advancedTasks: [{ prompt: "Một nguyên liệu trong đơn đã hết. Bạn nên làm gì?", choices: ["Báo khách và đề xuất thay thế phù hợp", "Tự ý bỏ nguyên liệu"], correct: 0 }] },
     chef_head: { jobId: "chef_head", jobName: "Đầu bếp chính", type: "chef", salary: 780000, careerLevel: 3, skillRequirements: { business: 3 }, promotionRequirements: { xp: 900, shifts: 8, performance: 75, reputation: 7, tenure: 8 }, nextJobs: ["chef_executive"], gameplayType: "chef", advancedTasks: [{ prompt: "Nhiều đơn cùng gọi món lâu. Bạn tổ chức bếp thế nào?", choices: ["Sơ chế song song và phân khu theo công đoạn", "Làm từng món từ đầu đến cuối"], correct: 0 }] },
     chef_executive: { jobId: "chef_executive", jobName: "Bếp trưởng", type: "chef", salary: 870000, careerLevel: 4, skillRequirements: { business: 4 }, promotionRequirements: { xp: 1300, shifts: 12, performance: 82, reputation: 12, tenure: 12 }, nextJobs: ["chef_manager"], gameplayType: "chef", advancedTasks: [{ prompt: "Món trả lại nhiều vì quá mặn. Bạn xử lý thế nào?", choices: ["Kiểm tra công thức, nếm mẫu và hướng dẫn lại", "Bỏ qua vì các món khác ổn"], correct: 0 }, { prompt: "Giờ cao điểm thiếu người ở khu ra món. Ưu tiên gì?", choices: ["Điều phối người hỗ trợ theo điểm nghẽn", "Dừng nhận mọi đơn"], correct: 0 }] },
-    chef_manager: { jobId: "chef_manager", jobName: "Quản lý bếp", type: "chef", salary: 950000, careerLevel: 5, skillRequirements: { business: 5 }, promotionRequirements: { xp: 1700, shifts: 16, performance: 86, reputation: 16, tenure: 16 }, nextJobs: [], gameplayType: "chef", advancedTasks: [{ prompt: "Chi phí nguyên liệu tăng mà chất lượng phải giữ ổn định. Bạn làm gì?", choices: ["Rà soát định lượng, nguồn cung và hao hụt", "Giảm khẩu phần không báo khách"], correct: 0 }, { prompt: "Lên lịch ca bếp cho ngày dự kiến đông khách. Ưu tiên gì?", choices: ["Xếp người theo kỹ năng và dự báo đơn", "Chia đều giờ cho tất cả"], correct: 0 }] }
+    lawyer_associate: { jobId: "lawyer_associate", jobName: "Trợ lý luật sư", type: "lawyer", salary: 600000, careerLevel: 1, skillRequirements: { analysis: 1 }, contractOptions: [3, 5, 7, 30], promotionRequirements: { xp: 300, shifts: 3, performance: 65, reputation: 1, tenure: 3 }, nextJobs: [], gameplayType: "lawyer", advancedTasks: [] }, chef_manager: { jobId: "chef_manager", jobName: "Quản lý bếp", type: "chef", salary: 950000, careerLevel: 5, skillRequirements: { business: 5 }, promotionRequirements: { xp: 1700, shifts: 16, performance: 86, reputation: 16, tenure: 16 }, nextJobs: [], gameplayType: "chef", advancedTasks: [{ prompt: "Chi phí nguyên liệu tăng mà chất lượng phải giữ ổn định. Bạn làm gì?", choices: ["Rà soát định lượng, nguồn cung và hao hụt", "Giảm khẩu phần không báo khách"], correct: 0 }, { prompt: "Lên lịch ca bếp cho ngày dự kiến đông khách. Ưu tiên gì?", choices: ["Xếp người theo kỹ năng và dự báo đơn", "Chia đều giờ cho tất cả"], correct: 0 }] }
   };
   Object.keys(CAREER_ROLES).forEach(function (id) {
     var role = CAREER_ROLES[id];
@@ -57,7 +57,7 @@ window.APXPages = window.APXPages || {};
     role.reputation = 0;
     role.xp = 0;
   });
-  var ROOT_ROLES = { sales: "sales_associate", warehouse: "warehouse_assistant", chef: "chef_helper" };
+  var ROOT_ROLES = { sales: "sales_associate", warehouse: "warehouse_assistant", chef: "chef_helper", lawyer: "lawyer_associate" };
   var CONTRACT_OPTIONS = [3, 5, 7, 30];
   var GAME_DAY_MS = 15 * 60 * 1000;
   var SALES_SCENARIOS = [
@@ -176,7 +176,7 @@ window.APXPages = window.APXPages || {};
     if (!career.employment.current) career.employment.current = null;
     if (!career.employment.pending) career.employment.pending = null;
     if (!career.promotionOffer) career.promotionOffer = null;
-    ["sales", "warehouse", "chef"].forEach(function (type) {
+    ["sales", "warehouse", "chef", "lawyer"].forEach(function (type) {
       var profession = career.professions[type] || {};
       profession.xp = Math.max(0, Number(profession.xp) || 0);
       profession.level = Math.max(1, Math.floor(Number(profession.level) || (1 + Math.floor(profession.xp / 350))));
@@ -197,7 +197,7 @@ window.APXPages = window.APXPages || {};
           : Math.max(1, Number(career.activeJob.totalOrders) || 1);
         career.activeJob.day = Math.max(1, Number(career.activeJob.day) || Number(state.day) || 1);
         career.activeJob.orderIndex = Math.max(0, Number(career.activeJob.orderIndex) || 0);
-        if (career.activeJob.gameplay && career.activeJob.gameplay.version !== 2) migrateShiftToLive(state, career, career.activeJob);
+        if (career.activeJob.type !== "lawyer" && career.activeJob.gameplay && career.activeJob.gameplay.version !== 2) migrateShiftToLive(state, career, career.activeJob);
         else if (!career.activeJob.gameplay) migrateBareShiftToLive(state, career, career.activeJob);
       }
     }
@@ -1175,7 +1175,7 @@ window.APXPages = window.APXPages || {};
       recipeId: type === "chef" ? RECIPES[(Number(state.day) + career.completedJobs) % RECIPES.length].id : null,
       stage: type === "chef" ? "ingredients" : "playing"
     }, offer);
-    career.activeJob.gameplay = createShiftGameplay(type, Math.max(career.professions[type].level, role.careerLevel), seed, career, state, shiftCode);
+    if (type === "lawyer") { career.activeJob.totalOrders = 100; career.activeJob.gameplay = { version: 3, caseMode: true }; if (!window.APXLawyerCases || !window.APXLawyerCases.startCareerCase(state)) { career.activeJob = null; return; } return saveAndRender("Đã bắt đầu ca trợ lý luật sư tại " + offer.employer + ". Hãy xử lý hồ sơ để hoàn thành ca."); } career.activeJob.gameplay = createShiftGameplay(type, Math.max(career.professions[type].level, role.careerLevel), seed, career, state, shiftCode);
     saveAndRender("Đã nhận " + shift.label.toLowerCase() + " tại " + offer.employer + ".");
   }
   function scoreSales(choice, state) {
@@ -1230,10 +1230,10 @@ window.APXPages = window.APXPages || {};
     var rankTasks = active.rankTasks || [], specialRound = Number(active.specialRound) || 0;
     if (specialRound < rankTasks.length && !(active.gameplay && active.gameplay.version === 2)) return;
     var job = JOBS[active.type];
-    var stats = active.gameplay ? playStats(active.gameplay) : null;
-    var coreTotal = active.gameplay ? 100 : (active.type === "chef" ? active.totalOrders * 3 : active.totalOrders);
+    var caseMode = Boolean(active.gameplay && active.gameplay.caseMode); var stats = active.gameplay && !caseMode ? playStats(active.gameplay) : null;
+    var coreTotal = active.gameplay && !caseMode ? 100 : (active.type === "chef" ? active.totalOrders * 3 : active.totalOrders);
     var total = coreTotal + rankTasks.length;
-    var correct = active.gameplay ? Math.round(stats.performance) : (Number(active.score) || 0);
+    var correct = active.gameplay && !caseMode ? Math.round(stats.performance) : (Number(active.score) || 0);
     correct += Number(active.specialScore) || 0;
     var ratio = Math.max(0, Math.min(1, correct / total));
     if (active.gameplay && active.gameplay.version === 2) {
@@ -1270,7 +1270,7 @@ window.APXPages = window.APXPages || {};
     career.completedWorkShifts += 1;
     career.totalSalaryEarned += pay;
     career.lastPaidDay = Math.max(1, Number(state.day) || Number(active.day) || 1);
-    var kpi = active.gameplay && active.gameplay.version === 2 ? active.gameplay.metrics.ordersAppeared + active.gameplay.metrics.customersAppeared > 0 && Math.round(ratio * 100) >= 60 && active.gameplay.metrics.ordersFailed <= Math.max(1, active.gameplay.metrics.ordersCompleted * 0.35) : active.gameplay ? active.gameplay.workDone >= active.gameplay.workCount && stats.performance >= 60 : ratio >= 0.6;
+    var kpi = active.gameplay && active.gameplay.version === 2 ? active.gameplay.metrics.ordersAppeared + active.gameplay.metrics.customersAppeared > 0 && Math.round(ratio * 100) >= 60 && active.gameplay.metrics.ordersFailed <= Math.max(1, active.gameplay.metrics.ordersCompleted * 0.35) : active.gameplay && !caseMode ? active.gameplay.workDone >= active.gameplay.workCount && stats.performance >= 60 : ratio >= 0.6;
     var metrics = active.gameplay && active.gameplay.metrics || {};
     var result = { title: active.title, employer: active.employer, score: correct, total: total, pay: pay, salaryEarned: pay, salaryReceived: 0, salaryStatus: "pending", xp: earnedXP, day: career.lastPaidDay, id: active.id, jobId: active.roleId, shift: active.gameplay && active.gameplay.shift && active.gameplay.shift.code, earlyClosed: Boolean(active.gameplay && active.gameplay.earlyClosed), performance: Math.round(ratio * 100), conditionEfficiency: Math.round(conditionEfficiency * 100), accuracy: stats && stats.accuracy, satisfaction: stats && stats.satisfaction, quality: stats && stats.quality, orders: active.gameplay ? active.gameplay.workDone : null, units: metrics.units, closedUnits: metrics.ordersCompleted, revenue: stats && stats.revenue, operatingCosts: metrics.operatingCosts || 0, customersAppeared: metrics.customersAppeared || 0, customersServed: metrics.customersServed || 0, customersPurchased: metrics.customersPurchased || 0, customersLeft: metrics.customersLeft || 0, ordersAppeared: metrics.ordersAppeared || 0, ordersCompleted: metrics.ordersCompleted || 0, ordersFailed: metrics.ordersFailed || 0, averageResponse: metrics.responseCount ? Math.round((Number(metrics.responseMs) || 0) / Number(metrics.responseCount) / 1000) : 0, mistakes: stats && metrics.mistakes, returns: stats && metrics.returns, timePressureActions: metrics.timePressureActions || 0, kpi: kpi, grade: ratio >= 0.9 ? "Xuất sắc" : ratio >= 0.78 ? "Tốt" : ratio >= 0.6 ? "Đạt" : "Chưa đạt", bonus: Math.max(0, pay - active.basePay) };
     career.history.unshift(result);
@@ -1308,7 +1308,7 @@ window.APXPages = window.APXPages || {};
       }
     });
   }
-  function onCareerAction(button) {
+  function finishLawyerCase(state, score) { var career = ensureState(state), active = career.activeJob; if (!active || active.type !== "lawyer" || !active.gameplay || !active.gameplay.caseMode) { window.APXGame.toast("Không có ca Luật sư đang hoạt động để bàn giao.", "warning"); return null; } active.score = Math.max(0, Math.min(100, Number(score) || 0)); active.round = 100; active.totalOrders = 100; active.stage = "done"; finishJob(state); return career.history[0] || null; } function onCareerAction(button) {
     var action = button.dataset.careerAction;
     var state = window.APXGame && window.APXGame.state;
     if (!state) return;
@@ -1523,7 +1523,7 @@ window.APXPages = window.APXPages || {};
         active.totalOrders = play.workDone;
         active.round = play.workDone;
         finishJob(state);
-      } else if (active && Number(active.day) <= Number(closedDay)) {
+      } else if (active && active.type !== "lawyer" && Number(active.day) <= Number(closedDay)) {
         career.history.unshift({ title: active.title, employer: active.employer, score: active.score || 0, total: Math.max(0, Number(active.totalOrders) || 0), pay: 0, xp: 0, day: Number(closedDay), abandoned: true });
         career.history = career.history.slice(0, 20);
         career.activeJob = null;
@@ -1562,7 +1562,7 @@ window.APXPages = window.APXPages || {};
       }
     },
     getLevel: function (state) { return progressFor(state).level; },
-    getProgress: function (state) { return progressFor(state); },
+    getProgress: function (state) { return progressFor(state); }, finishLawyerCase: finishLawyerCase,
     recipeCount: RECIPES.length
   };
   window.APXPages.career = function (page, state) {
