@@ -29,6 +29,7 @@ window.APXPages = window.APXPages || {};
     warehouse: { title: "Nhân viên kho", icon: "📦", basePay: 550000, bonusPay: 450000, skill: "analysis", skillName: "Phân tích", shift: "Nhận, ưu tiên và soạn các đơn giao phát sinh." },
     chef: { title: "Đầu bếp", icon: "🍳", basePay: 600000, bonusPay: 400000, skill: "business", skillName: "Kinh doanh", shift: "Nấu các món theo ticket khách gọi trong ngày." }
   };
+  var salaryPaymentsInFlight = Object.create(null);
   // Career roles are data records so new jobs and branches can be added without
   // changing contract, promotion, or shift handling.
   var CAREER_ROLES = {
@@ -584,8 +585,37 @@ window.APXPages = window.APXPages || {};
   }
   function resultCard(result) {
     if (!result) return '';
-    if (result.performance != null) return '<section class="panel career-result"><span class="eyebrow">KẾT QUẢ CA' + (result.earlyClosed ? ' · CHỐT SỚM' : '') + ' · ' + esc(result.grade || 'Đã hoàn thành') + '</span><strong>' + esc(result.title) + ' · ' + esc(result.employer) + '</strong><div class="career-result-grid"><span>Hiệu suất<strong>' + result.performance + '%</strong></span><span>Chính xác<strong>' + (result.accuracy == null ? '—' : result.accuracy + '%') + '</strong></span><span>Hài lòng<strong>' + (result.satisfaction == null ? '—' : result.satisfaction + '%') + '</strong></span><span>Chất lượng<strong>' + (result.quality == null ? '—' : result.quality + '%') + '</strong></span><span>Đơn/khách<strong>' + (result.orders == null ? result.score + '/' + result.total : result.orders) + '</strong></span><span>Sản phẩm<strong>' + (result.units == null ? '—' : result.units) + (result.closedUnits == null ? '' : ' · đã bán ' + result.closedUnits) + '</strong></span><span>Sai sót<strong>' + (result.mistakes || 0) + ' · Trả hàng ' + (result.returns || 0) + '</strong></span><span>KPI<strong>' + (result.kpi ? 'Đạt' : 'Chưa đạt') + '</strong></span><span>Thưởng<strong>' + money(result.bonus || 0) + '</strong></span></div><p>Lương ' + money(result.pay) + ' · +' + result.xp + ' XP sự nghiệp' + (result.revenue == null ? '' : ' · Doanh thu ' + money(result.revenue)) + '</p></section>';
-    return '<section class="panel career-result"><span class="eyebrow">CA LÀM GẦN NHẤT</span><strong>' + esc(result.title) + ' · ' + esc(result.employer) + '</strong><p>Đơn chính xác ' + result.score + '/' + result.total + ' · Lương ' + money(result.pay) + ' · +' + result.xp + ' XP sự nghiệp</p></section>';
+    var salaryStatus = result.salaryStatus === "paid" ? "Đã vào APXBank" : result.salaryStatus === "pending" ? "Chưa chuyển vào APXBank" : "";
+    var salaryRetry = result.salaryStatus === "pending" ? ' <button class="button" type="button" data-career-action="retry-salary" data-shift-id="' + esc(result.id) + '">Thử nhận lương lại</button>' : "";
+    if (result.performance != null) return '<section class="panel career-result"><span class="eyebrow">KẾT QUẢ CA' + (result.earlyClosed ? ' · CHỐT SỚM' : '') + ' · ' + esc(result.grade || 'Đã hoàn thành') + '</span><strong>' + esc(result.title) + ' · ' + esc(result.employer) + '</strong><div class="career-result-grid"><span>Hiệu suất<strong>' + result.performance + '%</strong></span><span>Chính xác<strong>' + (result.accuracy == null ? '—' : result.accuracy + '%') + '</strong></span><span>Hài lòng<strong>' + (result.satisfaction == null ? '—' : result.satisfaction + '%') + '</strong></span><span>Chất lượng<strong>' + (result.quality == null ? '—' : result.quality + '%') + '</strong></span><span>Đơn/khách<strong>' + (result.orders == null ? result.score + '/' + result.total : result.orders) + '</strong></span><span>Sản phẩm<strong>' + (result.units == null ? '—' : result.units) + (result.closedUnits == null ? '' : ' · đã bán ' + result.closedUnits) + '</strong></span><span>Sai sót<strong>' + (result.mistakes || 0) + ' · Trả hàng ' + (result.returns || 0) + '</strong></span><span>KPI<strong>' + (result.kpi ? 'Đạt' : 'Chưa đạt') + '</strong></span><span>Thưởng<strong>' + money(result.bonus || 0) + '</strong></span>' + (salaryStatus ? '<span>Thanh toán<strong>' + salaryStatus + '</strong></span>' : '') + '</div><p>Lương ' + money(result.pay) + ' · +' + result.xp + ' XP sự nghiệp' + (result.revenue == null ? '' : ' · Doanh thu ' + money(result.revenue)) + '</p>' + salaryRetry + '</section>';
+    return '<section class="panel career-result"><span class="eyebrow">CA LÀM GẦN NHẤT</span><strong>' + esc(result.title) + ' · ' + esc(result.employer) + '</strong><p>Đơn chính xác ' + result.score + '/' + result.total + ' · Lương ' + money(result.pay) + ' · +' + result.xp + ' XP sự nghiệp' + (salaryStatus ? ' · ' + salaryStatus : '') + '</p>' + salaryRetry + '</section>';
+  }
+  function settleCareerSalary(state, result) {
+    var career = ensureState(state);
+    if (!result || result.salaryStatus === "paid") return Promise.resolve(true);
+    if (salaryPaymentsInFlight[result.id]) return Promise.reject(new Error("Giao dịch nhận lương đang được xử lý."));
+    if (!window.APXBank || typeof window.APXBank.recordCareerSalary !== "function") {
+      return Promise.reject(new Error("Hệ thống APXBank chưa sẵn sàng."));
+    }
+    result.salaryStatus = "pending";
+    salaryPaymentsInFlight[result.id] = true;
+    return Promise.resolve().then(function () {
+      return window.APXBank.recordCareerSalary(
+        state, result.id, Number(result.salaryEarned != null ? result.salaryEarned : result.pay),
+        "Lương ca làm tại " + result.employer
+      );
+    }).then(function () {
+      if (result.salaryStatus !== "paid") career.totalSalaryReceived += Math.max(0, Number(result.salaryEarned != null ? result.salaryEarned : result.pay) || 0);
+      result.salaryStatus = "paid";
+      result.salaryReceived = Math.max(0, Number(result.salaryEarned != null ? result.salaryEarned : result.pay) || 0);
+      result.salaryReceivedAt = new Date().toISOString();
+      delete salaryPaymentsInFlight[result.id];
+      return true;
+    }, function (error) {
+      result.salaryStatus = "pending";
+      delete salaryPaymentsInFlight[result.id];
+      throw error;
+    });
   }
   function dailyReportCard(report) {
     if (!report) return '';
@@ -1239,15 +1269,10 @@ window.APXPages = window.APXPages || {};
     career.completedJobs += 1;
     career.completedWorkShifts += 1;
     career.totalSalaryEarned += pay;
-    career.totalSalaryReceived += pay;
     career.lastPaidDay = Math.max(1, Number(state.day) || Number(active.day) || 1);
-    state.cash = Math.max(0, Number(state.cash) || 0) + pay;
-    if (window.APXBank && typeof window.APXBank.recordGameIncome === "function") {
-      window.APXBank.recordGameIncome(state, "salary", pay, "Lương ca làm tại " + active.employer);
-    }
     var kpi = active.gameplay && active.gameplay.version === 2 ? active.gameplay.metrics.ordersAppeared + active.gameplay.metrics.customersAppeared > 0 && Math.round(ratio * 100) >= 60 && active.gameplay.metrics.ordersFailed <= Math.max(1, active.gameplay.metrics.ordersCompleted * 0.35) : active.gameplay ? active.gameplay.workDone >= active.gameplay.workCount && stats.performance >= 60 : ratio >= 0.6;
     var metrics = active.gameplay && active.gameplay.metrics || {};
-    var result = { title: active.title, employer: active.employer, score: correct, total: total, pay: pay, salaryEarned: pay, salaryReceived: pay, salaryReceivedAt: new Date().toISOString(), xp: earnedXP, day: career.lastPaidDay, id: active.id, jobId: active.roleId, shift: active.gameplay && active.gameplay.shift && active.gameplay.shift.code, earlyClosed: Boolean(active.gameplay && active.gameplay.earlyClosed), performance: Math.round(ratio * 100), conditionEfficiency: Math.round(conditionEfficiency * 100), accuracy: stats && stats.accuracy, satisfaction: stats && stats.satisfaction, quality: stats && stats.quality, orders: active.gameplay ? active.gameplay.workDone : null, units: metrics.units, closedUnits: metrics.ordersCompleted, revenue: stats && stats.revenue, operatingCosts: metrics.operatingCosts || 0, customersAppeared: metrics.customersAppeared || 0, customersServed: metrics.customersServed || 0, customersPurchased: metrics.customersPurchased || 0, customersLeft: metrics.customersLeft || 0, ordersAppeared: metrics.ordersAppeared || 0, ordersCompleted: metrics.ordersCompleted || 0, ordersFailed: metrics.ordersFailed || 0, averageResponse: metrics.responseCount ? Math.round((Number(metrics.responseMs) || 0) / Number(metrics.responseCount) / 1000) : 0, mistakes: stats && metrics.mistakes, returns: stats && metrics.returns, timePressureActions: metrics.timePressureActions || 0, kpi: kpi, grade: ratio >= 0.9 ? "Xuất sắc" : ratio >= 0.78 ? "Tốt" : ratio >= 0.6 ? "Đạt" : "Chưa đạt", bonus: Math.max(0, pay - active.basePay) };
+    var result = { title: active.title, employer: active.employer, score: correct, total: total, pay: pay, salaryEarned: pay, salaryReceived: 0, salaryStatus: "pending", xp: earnedXP, day: career.lastPaidDay, id: active.id, jobId: active.roleId, shift: active.gameplay && active.gameplay.shift && active.gameplay.shift.code, earlyClosed: Boolean(active.gameplay && active.gameplay.earlyClosed), performance: Math.round(ratio * 100), conditionEfficiency: Math.round(conditionEfficiency * 100), accuracy: stats && stats.accuracy, satisfaction: stats && stats.satisfaction, quality: stats && stats.quality, orders: active.gameplay ? active.gameplay.workDone : null, units: metrics.units, closedUnits: metrics.ordersCompleted, revenue: stats && stats.revenue, operatingCosts: metrics.operatingCosts || 0, customersAppeared: metrics.customersAppeared || 0, customersServed: metrics.customersServed || 0, customersPurchased: metrics.customersPurchased || 0, customersLeft: metrics.customersLeft || 0, ordersAppeared: metrics.ordersAppeared || 0, ordersCompleted: metrics.ordersCompleted || 0, ordersFailed: metrics.ordersFailed || 0, averageResponse: metrics.responseCount ? Math.round((Number(metrics.responseMs) || 0) / Number(metrics.responseCount) / 1000) : 0, mistakes: stats && metrics.mistakes, returns: stats && metrics.returns, timePressureActions: metrics.timePressureActions || 0, kpi: kpi, grade: ratio >= 0.9 ? "Xuất sắc" : ratio >= 0.78 ? "Tốt" : ratio >= 0.6 ? "Đạt" : "Chưa đạt", bonus: Math.max(0, pay - active.basePay) };
     career.history.unshift(result);
     career.history = career.history.slice(0, 20);
     if (window.APXQuest && typeof window.APXQuest.onWorkShiftPaid === "function") {
@@ -1268,14 +1293,40 @@ window.APXPages = window.APXPages || {};
     if (window.APXGame) {
       window.APXGame.save();
       window.APXGame.render();
-      window.APXGame.toast((result.earlyClosed ? "Đã chốt ca sớm · " : "Hoàn thành ca làm · ") + "nhận " + money(pay) + " và " + earnedXP + " XP sự nghiệp.");
     }
+    settleCareerSalary(state, result).then(function () {
+      if (window.APXGame) {
+        window.APXGame.save();
+        window.APXGame.render();
+        window.APXGame.toast((result.earlyClosed ? "Đã chốt ca sớm · " : "Hoàn thành ca làm · ") + money(pay) + " đã vào tài khoản APXBank và nhận " + earnedXP + " XP sự nghiệp.");
+      }
+    }).catch(function (error) {
+      if (window.APXGame) {
+        window.APXGame.save();
+        window.APXGame.render();
+        window.APXGame.toast("Ca đã hoàn thành nhưng lương chưa vào APXBank. Mở lại kết quả ca và chọn “Thử nhận lương lại”. " + (error && error.message ? error.message : ""), "warning");
+      }
+    });
   }
   function onCareerAction(button) {
     var action = button.dataset.careerAction;
     var state = window.APXGame && window.APXGame.state;
     if (!state) return;
     var career = ensureState(state), active = career.activeJob;
+    if (action === "retry-salary") {
+      var pendingSalary = career.history.find(function (item) { return String(item.id) === String(button.dataset.shiftId); });
+      if (!pendingSalary || pendingSalary.salaryStatus === "paid") return;
+      button.disabled = true;
+      settleCareerSalary(state, pendingSalary).then(function () {
+        window.APXGame.save();
+        window.APXGame.render();
+        window.APXGame.toast(money(pendingSalary.salaryReceived) + " đã vào tài khoản APXBank.");
+      }).catch(function (error) {
+        button.disabled = false;
+        window.APXGame.toast("Chưa thể chuyển lương vào APXBank: " + (error && error.message ? error.message : "lỗi đồng bộ"), "warning");
+      });
+      return;
+    }
     if (action === "buy-food") {
       if (!window.APXCharacter || !window.APXCharacter.buyFood) return window.APXGame.toast("Hệ thống ăn uống chưa sẵn sàng.", "warning");
       var purchase = window.APXCharacter.buyFood(state, button.dataset.food);

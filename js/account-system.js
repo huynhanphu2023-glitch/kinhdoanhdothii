@@ -272,6 +272,33 @@
     return result.data;
   }
 
+  async function creditCareerSalary(shiftId, amount, memo) {
+    if (!profile) throw new Error("Hãy đăng nhập để nhận lương vào APXBank.");
+    var game = window.APXGame;
+    if (!game || !game.state) throw new Error("Chưa tải tiến trình người chơi.");
+    var salary = Number(amount);
+    if (!Number.isSafeInteger(salary) || salary <= 0 || salary > 1000000) {
+      throw new Error("Số tiền lương không hợp lệ.");
+    }
+    if (!shiftId) throw new Error("Thiếu mã ca làm để xác nhận lương.");
+
+    await flushSave();
+    var db = await withTimeout(supabase(), 12000, "Supabase không phản hồi.");
+    var result = await withTimeout(db.rpc("apx_bank_career_salary", {
+      p_shift_id: String(shiftId),
+      p_amount: salary,
+      p_memo: String(memo || "")
+    }), 12000, "Supabase không phản hồi khi chuyển lương vào APXBank.");
+    if (result.error) throw result.error;
+    if (!result.data || !result.data.game_state) {
+      throw new Error("Máy chủ không trả về số dư APXBank mới.");
+    }
+
+    mergeCloudTransactionChanges(game.state, result.data.game_state);
+    game.save();
+    return result.data;
+  }
+
   function withTimeout(promise, ms, message) {
     return new Promise(function (resolve, reject) {
       var timer = window.setTimeout(function () { reject(new Error(message)); }, ms);
@@ -332,7 +359,7 @@
 
     var savedBank = result.data.game_state.apxBank || {};
     var requestedBank = state.apxBank || {};
-    if (requestedBank.accountBalance != null && Number(savedBank.accountBalance) !== Number(requestedBank.accountBalance)) {
+    if (requestedBank.accountBalance != null && (Number(savedBank.accountBalance) || 0) !== (Number(requestedBank.accountBalance) || 0)) {
       throw new Error("Máy chủ đã giữ số dư APXBank cũ. RPC apx_save_game_state hiện chỉ lưu ví tiền mặt, chưa lưu số dư/nghiệp vụ APXBank. Cần cập nhật RPC ngân hàng trên Supabase.");
     }
 
@@ -1521,6 +1548,7 @@
 
     flushSave: flushSave,
     transferBankCash: transferBankCash,
+    creditCareerSalary: creditCareerSalary,
 
     render: render
   };

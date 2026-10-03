@@ -229,6 +229,22 @@ window.APXPages = window.APXPages || {};
     notify(state, "income", type === "salary" ? "Đã nhận lương" : "Đã nhận tiền", memo + " · " + money(value) + ".");
     b.observedCash = Math.max(0, Number(state.cash) || 0);
   }
+  function recordCareerSalary(state, shiftId, amount, memo) {
+    var value = parseAmount(amount), message = String(memo || "Lương ca làm");
+    if (!shiftId) throw new Error("Thiếu mã ca làm để xác nhận lương.");
+    if (window.APXAccount && window.APXAccount.isLoggedIn && window.APXAccount.isLoggedIn()) {
+      if (typeof window.APXAccount.creditCareerSalary !== "function") {
+        throw new Error("Hệ thống lưu lương APXBank chưa sẵn sàng.");
+      }
+      return window.APXAccount.creditCareerSalary(shiftId, value, message);
+    }
+
+    var b = ensure(state);
+    b.accountBalance += value;
+    addTx(state, "salary", value, message, { id: String(shiftId) });
+    notify(state, "income", "Đã nhận lương", message + " · " + money(value) + " đã vào APXBank.");
+    return Promise.resolve(true);
+  }
   function addLoanPayment(state, loan, amount, automatic) {
     var b = ensure(state), pay = Math.min(Math.max(0, Number(amount) || 0), Number(loan.remainingBalance) || 0);
     if (!pay) return 0;
@@ -495,6 +511,7 @@ window.APXPages = window.APXPages || {};
     prepareState: ensure,
     observeCash: observeCash,
     recordGameIncome: gameIncome,
+    recordCareerSalary: recordCareerSalary,
     onGameDayClosed: processDay,
     persistDayClose: persistDayClose,
     refreshTotals: totals,
