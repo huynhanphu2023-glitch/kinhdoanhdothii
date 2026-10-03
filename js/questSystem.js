@@ -34,7 +34,7 @@ window.APXQuest = (function () {
     if (!state || typeof state !== "object") return null;
     if (!state.quests || typeof state.quests !== "object") {
       state.quests = {
-        version: 2,
+        version: 3,
         createdAt: new Date().toISOString(),
         records: {},
         history: []
@@ -42,7 +42,8 @@ window.APXQuest = (function () {
     }
 
     var questState = state.quests;
-    questState.version = 2;
+    var previousVersion = Number(questState.version) || 1;
+    questState.version = 3;
     if (!questState.records || typeof questState.records !== "object") questState.records = {};
     if (!Array.isArray(questState.history)) questState.history = [];
     if (!Array.isArray(questState.processedWorkShiftPayments)) questState.processedWorkShiftPayments = [];
@@ -64,7 +65,13 @@ window.APXQuest = (function () {
       }
       if (!record.createdAt) record.createdAt = new Date().toISOString();
       if (!record.progress || typeof record.progress !== "object") record.progress = {};
-      if (record.status === "COMPLETED") record.rewardClaimed = true;
+      if (previousVersion < 3 && record.status === "COMPLETED" && record.rewardClaimed === true) {
+        record.legacyExperienceClaimed = true;
+        record.rewardClaimed = false;
+      }
+      if (record.status === "COMPLETED" && typeof record.rewardClaimed !== "boolean") {
+        record.rewardClaimed = false;
+      }
 
       var previous = index > 0 ? definitions[index - 1] : null;
       if (definition.unlockAfter && previous && previous.id !== definition.unlockAfter) {
@@ -149,28 +156,24 @@ window.APXQuest = (function () {
       record.status = "COMPLETED";
       record.completedAt = new Date().toISOString();
       record.progressAtCompletion = Object.assign({}, record.progress);
-      record.rewardClaimed = true;
+      record.rewardClaimed = false;
+      record.legacyExperienceClaimed = false;
+      var cashReward = Math.max(0, Math.floor(Number(definition.reward.cash) || 0));
       var careerReward = Math.max(0, Math.floor(Number(definition.reward.careerExp) || 0));
       var characterReward = Math.max(0, Math.floor(Number(definition.reward.characterExp) || 0));
-      career.xp = Math.max(0, Number(career.xp) || 0) + careerReward;
       var historyEntry = {
         questId: definition.id,
         completedAt: record.completedAt,
-        rewardClaimed: true,
+        rewardClaimed: false,
         progressAtCompletion: Object.assign({}, record.progressAtCompletion),
-        reward: { careerExp: careerReward, characterExp: characterReward }
+        reward: { cash: cashReward, careerExp: careerReward, characterExp: characterReward }
       };
       questState.history.unshift(historyEntry);
       questState.history = questState.history.slice(0, 200);
-      if (characterReward > 0 && window.APXCharacter && window.APXCharacter.addCharacterXP) {
-        window.APXCharacter.addCharacterXP(characterReward, "Nhiệm vụ: " + definition.title);
-      }
       completed.push(definition.id);
-      var rewardMessage = "+" + careerReward + " EXP nghề nghiệp" +
-        (characterReward ? " · +" + characterReward + " EXP nhân vật" : "");
-      addPhoneNotice(state, "Hoàn thành nhiệm vụ!", "Bạn đã hoàn thành: " + definition.title + " · " + rewardMessage);
+      addPhoneNotice(state, "Hoàn thành nhiệm vụ!", "Bạn đã hoàn thành: " + definition.title + ". Hãy nhận quà trong mục Nhiệm vụ.");
       if (window.APXGame && window.APXGame.toast) {
-        window.APXGame.toast("Hoàn thành nhiệm vụ! " + rewardMessage);
+        window.APXGame.toast("Hoàn thành nhiệm vụ! Hãy nhấn Nhận để lấy tiền và EXP.");
       }
       unlockNext(state, questState, definition);
       if (state.phone && state.phone.visible && window.APXPhone && window.APXPhone.refresh) {
@@ -180,6 +183,42 @@ window.APXQuest = (function () {
     }
 
     return completed;
+  }
+
+  function claimReward(state, questId) {
+    var questState = ensureState(state);
+    var definition = definitions.find(function (item) { return item.id === questId; });
+    var record = questState && questState.records[questId];
+    if (!definition || !record || record.status !== "COMPLETED" || record.rewardClaimed) return null;
+
+    var career = careerState(state);
+    var cashReward = Math.max(0, Math.floor(Number(definition.reward.cash) || 0));
+    var careerReward = record.legacyExperienceClaimed
+      ? 0
+      : Math.max(0, Math.floor(Number(definition.reward.careerExp) || 0));
+    var characterReward = record.legacyExperienceClaimed
+      ? 0
+      : Math.max(0, Math.floor(Number(definition.reward.characterExp) || 0));
+
+    record.rewardClaimed = true;
+    record.rewardClaimedAt = new Date().toISOString();
+    state.cash = Math.max(0, Number(state.cash) || 0) + cashReward;
+    career.xp = Math.max(0, Number(career.xp) || 0) + careerReward;
+    if (window.APXCareer && typeof window.APXCareer.getProgress === "function") {
+      window.APXCareer.getProgress(state);
+    }
+    if (characterReward > 0 && window.APXCharacter && window.APXCharacter.addCharacterXP) {
+      window.APXCharacter.addCharacterXP(characterReward, "Nhiệm vụ: " + definition.title);
+    }
+
+    var historyEntry = questState.history.find(function (entry) { return entry.questId === questId; });
+    if (historyEntry) {
+      historyEntry.rewardClaimed = true;
+      historyEntry.rewardClaimedAt = record.rewardClaimedAt;
+    }
+    addPhoneNotice(state, "Đã nhận thưởng nhiệm vụ", definition.title + " · +" +
+      window.APXUI.money(cashReward) + (careerReward ? " · +" + careerReward + " EXP" : " · EXP đã nhận trước đó"));
+    return { cash: cashReward, careerExp: careerReward, characterExp: characterReward };
   }
 
   function currentProgress(state, questState, definition, record) {
@@ -209,11 +248,57 @@ window.APXQuest = (function () {
     return statusLabels[status] || statusLabels.LOCKED;
   }
 
+  function syncCompletedQuests(state, questState) {
+    var current = metrics(state);
+    definitions.forEach(function (definition, index) {
+      var record = questState.records[definition.id];
+      var previous = index > 0 ? definitions[index - 1] : null;
+      if (record.status === "LOCKED" && (!previous || questState.records[previous.id].status === "COMPLETED")) {
+        record.status = "AVAILABLE";
+      }
+      if (record.status === "AVAILABLE") record.status = "ACTIVE";
+      if (record.status !== "ACTIVE") return;
+
+      var requirementsMet = definition.requirements.every(function (requirement) {
+        var value = Math.max(0, Number(current[requirement.type]) || 0);
+        record.progress[requirement.type] = value;
+        return value >= requirement.target;
+      });
+      if (!requirementsMet) return;
+
+      record.status = "COMPLETED";
+      record.completedAt = record.completedAt || new Date().toISOString();
+      record.progressAtCompletion = Object.assign({}, record.progress);
+      if (typeof record.rewardClaimed !== "boolean") record.rewardClaimed = false;
+      if (!questState.history.some(function (entry) { return entry.questId === definition.id; })) {
+        questState.history.unshift({
+          questId: definition.id,
+          completedAt: record.completedAt,
+          rewardClaimed: record.rewardClaimed,
+          progressAtCompletion: Object.assign({}, record.progressAtCompletion),
+          reward: {
+            cash: Math.max(0, Math.floor(Number(definition.reward.cash) || 0)),
+            careerExp: Math.max(0, Math.floor(Number(definition.reward.careerExp) || 0)),
+            characterExp: Math.max(0, Math.floor(Number(definition.reward.characterExp) || 0))
+          }
+        });
+        questState.history = questState.history.slice(0, 200);
+      }
+    });
+  }
+
   function questCard(state, questState, definition) {
     var record = questState.records[definition.id];
     var progress = currentProgress(state, questState, definition, record);
+    var cashReward = Number(definition.reward.cash) || 0;
     var careerReward = Number(definition.reward.careerExp) || 0;
     var characterReward = Number(definition.reward.characterExp) || 0;
+    var claimButton = record.status === "COMPLETED" && !record.rewardClaimed
+      ? '<button class="button button-gold apx-quest-claim" type="button" data-quest-action="claim" data-quest-id="' + definition.id + '">Nhận</button>'
+      : "";
+    var rewardLabel = record.legacyExperienceClaimed
+      ? "EXP đã nhận trước đó"
+      : "+" + careerReward + " EXP nghề nghiệp" + (characterReward ? " · +" + characterReward + " EXP nhân vật" : "");
     var requirements = progress.rows.map(function (item) {
       var value = item.type === "salary_received"
         ? window.APXUI.money(item.shown)
@@ -221,11 +306,12 @@ window.APXQuest = (function () {
       var target = item.type === "salary_received" ? window.APXUI.money(item.target) : item.type === "current_job_active" ? "Có" : String(item.target);
       return '<li class="apx-quest-requirement ' + (item.done ? "is-complete" : "") + '"><span>' + (item.done ? "✓ " : "") + item.label + '</span><strong>' + value + ' / ' + target + '</strong></li>';
     }).join("");
-    return '<article class="apx-card apx-quest-card quest-' + record.status.toLowerCase() + '"><div class="apx-quest-card-top"><span class="eyebrow">' + definition.category + ' · ' + definition.type + '</span><span class="apx-quest-status">' + statusText(record.status) + '</span></div><h3>' + definition.title + '</h3><p>' + definition.description + '</p><ul class="apx-quest-requirements">' + requirements + '</ul><div class="progress" role="progressbar" aria-label="' + definition.title + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress.percent + '"><span style="width:' + progress.percent + '%"></span></div><div class="apx-quest-reward"><span>Phần thưởng</span><strong>+' + careerReward + ' EXP nghề nghiệp' + (characterReward ? ' · +' + characterReward + ' EXP nhân vật' : '') + '</strong></div></article>';
+    return '<article class="apx-card apx-quest-card quest-' + record.status.toLowerCase() + '"><div class="apx-quest-card-top"><span class="eyebrow">' + definition.category + ' · ' + definition.type + '</span><span class="apx-quest-status">' + statusText(record.status) + '</span></div><h3>' + definition.title + '</h3><p>' + definition.description + '</p><ul class="apx-quest-requirements">' + requirements + '</ul><div class="progress" role="progressbar" aria-label="' + definition.title + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + progress.percent + '"><span style="width:' + progress.percent + '%"></span></div><div class="apx-quest-reward"><span>Phần thưởng</span><strong>' + window.APXUI.money(cashReward) + ' · ' + rewardLabel + '</strong>' + claimButton + '</div></article>';
   }
 
   function render(state) {
     var questState = ensureState(state);
+    syncCompletedQuests(state, questState);
     var career = careerState(state);
     var xpProgress = window.APXCareer && window.APXCareer.getProgress
       ? window.APXCareer.getProgress(state)
@@ -260,6 +346,42 @@ window.APXQuest = (function () {
     definitions: definitions,
     ensureState: ensureState,
     onWorkShiftPaid: onWorkShiftPaid,
+    claimReward: claimReward,
     render: render
   };
 })();
+
+document.addEventListener("click", function (event) {
+  var button = event.target.closest('[data-quest-action="claim"]');
+  if (!button || !window.APXGame) return;
+  var state = window.APXGame.state;
+  var account = window.APXAccount;
+  if (account && account.isLoggedIn && account.isLoggedIn()) {
+    if (!account.claimQuestReward) {
+      if (window.APXGame.toast) window.APXGame.toast("Chưa thể nhận thưởng do thiếu kết nối máy chủ.");
+      return;
+    }
+    button.disabled = true;
+    account.claimQuestReward(button.dataset.questId).then(function (reward) {
+      window.APXGame.render();
+      if (window.APXGame.toast) {
+        window.APXGame.toast("Đã nhận +" + window.APXUI.money(reward.cash) +
+          (reward.careerExp ? " và +" + reward.careerExp + " EXP!" : " tiền thưởng!"));
+      }
+    }).catch(function (error) {
+      button.disabled = false;
+      if (window.APXGame.toast) {
+        window.APXGame.toast("Chưa nhận được thưởng: " + error.message);
+      }
+    });
+    return;
+  }
+  var reward = window.APXQuest.claimReward(state, button.dataset.questId);
+  if (!reward) return;
+  window.APXGame.save();
+  window.APXGame.render();
+  if (window.APXGame.toast) {
+    window.APXGame.toast("Đã nhận +" + window.APXUI.money(reward.cash) +
+      (reward.careerExp ? " và +" + reward.careerExp + " EXP!" : " tiền thưởng!"));
+  }
+});

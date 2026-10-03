@@ -10,6 +10,7 @@
   var client = null;
   var profile = null;
   var saveTimer = null;
+  var pendingQuestClaims = Object.create(null);
   var lastSyncedGameState = null;
   var pageMessage = "";
   var pendingOtpEmail = sessionStorage.getItem("apx-pending-otp-email") || "";
@@ -297,6 +298,66 @@
     mergeCloudTransactionChanges(game.state, result.data.game_state);
     game.save();
     return result.data;
+  }
+
+  async function claimQuestReward(questId) {
+    if (!profile) throw new Error("Hãy đăng nhập để nhận thưởng nhiệm vụ.");
+    if (!/^personal_work_\d{3}$/.test(String(questId || ""))) {
+      throw new Error("Mã nhiệm vụ không hợp lệ.");
+    }
+    var game = window.APXGame;
+    if (!game || !game.state) throw new Error("Chưa tải tiến trình người chơi.");
+
+    if (!pendingQuestClaims[questId]) {
+      await flushSave();
+      pendingQuestClaims[questId] = true;
+    }
+    var previousState = copyGameState(lastSyncedGameState || game.state);
+    var db = await withTimeout(supabase(), 12000, "Supabase không phản hồi.");
+    var result = await withTimeout(db.rpc("apx_quest_claim_reward", {
+      p_quest_id: String(questId)
+    }), 12000, "Supabase không phản hồi khi nhận thưởng nhiệm vụ.");
+    if (result.error) throw result.error;
+    if (!result.data || !result.data.game_state) {
+      throw new Error("Máy chủ không trả về tiến trình mới sau khi nhận thưởng.");
+    }
+
+    var serverState = result.data.game_state;
+    var careerXPDelta = (Number(serverState.career && serverState.career.xp) || 0) -
+      (Number(previousState.career && previousState.career.xp) || 0);
+    var characterXPDelta = (Number(serverState.character && serverState.character.level && serverState.character.level.totalXP) || 0) -
+      (Number(previousState.character && previousState.character.level && previousState.character.level.totalXP) || 0);
+    mergeCloudTransactionChanges(game.state, serverState);
+
+    var serverRecord = serverState.quests && serverState.quests.records && serverState.quests.records[questId];
+    if (serverRecord) {
+      if (!game.state.quests || typeof game.state.quests !== "object") game.state.quests = {};
+      if (!game.state.quests.records || typeof game.state.quests.records !== "object") game.state.quests.records = {};
+      game.state.quests.records[questId] = Object.assign(
+        game.state.quests.records[questId] || {},
+        serverRecord
+      );
+    }
+    var serverHistory = serverState.quests && serverState.quests.history;
+    var historyEntry = Array.isArray(serverHistory) && serverHistory.find(function (entry) {
+      return entry.questId === questId;
+    });
+    if (historyEntry) {
+      var localHistory = game.state.quests.history || (game.state.quests.history = []);
+      var localEntry = localHistory.find(function (entry) { return entry.questId === questId; });
+      if (localEntry) Object.assign(localEntry, historyEntry);
+    }
+    if (careerXPDelta > 0 && game.state.career) {
+      game.state.career.xp = Math.max(0, Number(game.state.career.xp) || 0) + careerXPDelta;
+      if (window.APXCareer && window.APXCareer.getProgress) window.APXCareer.getProgress(game.state);
+    }
+    if (characterXPDelta > 0 && window.APXCharacter && window.APXCharacter.addCharacterXP) {
+      window.APXCharacter.addCharacterXP(characterXPDelta, "Nhận thưởng nhiệm vụ");
+    }
+
+    delete pendingQuestClaims[questId];
+    game.save();
+    return result.data.reward || { cash: 0, careerExp: 0, characterExp: 0 };
   }
 
   function withTimeout(promise, ms, message) {
@@ -1549,6 +1610,7 @@
     flushSave: flushSave,
     transferBankCash: transferBankCash,
     creditCareerSalary: creditCareerSalary,
+    claimQuestReward: claimQuestReward,
 
     render: render
   };

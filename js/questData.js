@@ -51,6 +51,7 @@ window.APX_QUEST_DATA = (function () {
       progress: {},
       target: target,
       reward: {
+        cash: Math.max(20000, Math.round(milestone.salary * 0.1)),
         careerExp: milestone.careerExp,
         characterExp: milestone.careerExp
       },
