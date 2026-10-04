@@ -271,26 +271,27 @@ var CASE_005 = {
   ],
 
   finalDefense: {
-    title: "Xây dựng hồ sơ bảo vệ",
-    instruction: "Chọn đúng 3 luận điểm mạnh nhất. Đọc các chứng cứ cần thiết trước khi chốt; các luận điểm nền tảng giúp tăng điểm, còn kết luận tuyệt đối thiếu căn cứ gây bất lợi.",
+    title: "Chọn 3 luận điểm mạnh nhất",
+    instruction: "Không có đáp án hiện ngay. Sau khi kết thúc, hệ thống mới đánh giá toàn bộ cách bạn xử lý vụ án.",
+    minimumSelection: 0,
     selectionLimit: 3,
-    idealBonus: 2,
-    idealCombination: ["ARG_1", "ARG_4", "ARG_5", "ARG_7", "ARG_8"],
+    selectionScoring: {
+      positiveIds: ["ARG_1", "ARG_2", "ARG_4", "ARG_5", "ARG_7", "ARG_8"],
+      negativeIds: ["ARG_3", "ARG_6"],
+      positiveBonus: 8,
+      negativePenalty: 12
+    },
     arguments: [
       {
         id: "ARG_1",
         text: "Thành có hành vi điều khiển phương tiện và đã xảy ra va chạm.",
         tags: ["Trách nhiệm"],
-        requiresEvidence: ["E501", "E506"],
-        requiresLaw: ["LAW501"],
         effects: { legalAnalysis: 5, evidence: 5, argument: 5 }
       },
       {
         id: "ARG_2",
         text: "Nam có thiệt hại sức khỏe được hồ sơ y tế chứng minh.",
         tags: ["Thiệt hại"],
-        requiresEvidence: ["E502"],
-        requiresLaw: ["LAW502"],
         effects: { evidence: 7, legalAnalysis: 5, caseUnderstanding: 4 }
       },
       {
@@ -301,21 +302,19 @@ var CASE_005 = {
       },
       {
         id: "ARG_4",
-        text: "Camera có góc chết nên cần đánh giá cùng các chứng cứ khác.",
+        text: "Camera có góc chết nên phải được đánh giá cùng chứng cứ khác.",
         tags: ["Đánh giá chứng cứ"],
-        requiresEvidence: ["E501", "E505"],
         effects: { evidence: 7, legalAnalysis: 5, caseUnderstanding: 5 }
       },
       {
         id: "ARG_5",
-        text: "Lời khai nhân chứng cần được đối chiếu với camera và vị trí thực tế.",
+        text: "Lời khai nhân chứng cần được đối chiếu với vị trí và camera.",
         tags: ["Đánh giá chứng cứ"],
-        requiresEvidence: ["E503", "E504"],
         effects: { evidence: 7, legalAnalysis: 5, caseUnderstanding: 5 }
       },
       {
         id: "ARG_6",
-        text: "Mọi chi phí Nam yêu cầu đều phải được chấp nhận.",
+        text: "Tất cả các khoản chi phí Nam yêu cầu đều đương nhiên hợp lệ.",
         tags: ["Yêu cầu thiếu căn cứ"],
         effects: { legalAnalysis: -5, evidence: -6, argument: -5 }
       },
@@ -323,16 +322,12 @@ var CASE_005 = {
         id: "ARG_7",
         text: "Cần đánh giá cả phần lỗi có thể thuộc về Nam.",
         tags: ["Phân tích lỗi"],
-        requiresEvidence: ["E504", "E507"],
-        requiresLaw: ["LAW501"],
         effects: { legalAnalysis: 7, evidence: 5, argument: 5, clientTrust: 2 }
       },
       {
         id: "ARG_8",
-        text: "Thiệt hại cần được phân loại và chứng minh từng khoản.",
+        text: "Thiệt hại phải được chứng minh và phân loại từng khoản.",
         tags: ["Thiệt hại"],
-        requiresEvidence: ["E502", "E508", "E509"],
-        requiresLaw: ["LAW502"],
         effects: { legalAnalysis: 6, evidence: 7, procedure: 4, argument: 4 }
       }
     ]
