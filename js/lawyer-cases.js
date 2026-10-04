@@ -589,6 +589,12 @@ window.APXPages = window.APXPages || {};
       evidence: (Number(progress.stats.evidence) || 0) + (hasInvestigation ? 0 : research.evidencePoints),
       legalAnalysis: (Number(progress.stats.legalAnalysis) || 0) + (hasInvestigation ? 0 : research.lawPoints)
     });
+    if (Number(caseData.evidenceCountBonusPerItem) > 0) {
+      assessedStats.evidenceCountScore = Math.min(
+        100,
+        progress.unlockedEvidence.length * Number(caseData.evidenceCountBonusPerItem)
+      );
+    }
     if (hasInvestigation) assessedStats.procedure = Math.min(100, progress.completedInvestigationActions.length * 5);
     if (finalArgument) {
       Object.keys(finalArgument.effects || {}).forEach(function (key) {
@@ -616,8 +622,17 @@ window.APXPages = window.APXPages || {};
           defenseAdjustment += Number(selectionScoring.positiveBonus) || 0;
         } else if ((selectionScoring.negativeIds || []).indexOf(argument.id) >= 0) {
           defenseAdjustment -= Number(selectionScoring.negativePenalty) || 0;
+        } else if ((selectionScoring.neutralIds || []).indexOf(argument.id) >= 0) {
+          defenseAdjustment += Number(selectionScoring.neutralBonus) || 0;
         }
       });
+    }
+    (caseData.completionBonuses || []).forEach(function (bonus) {
+      if ((bonus.evidenceIds || []).every(function (actionId) {
+        return progress.completedInvestigationActions.indexOf(actionId) >= 0;
+      })) defenseAdjustment += Number(bonus.points) || 0;
+    });
+    if (selectionScoring || (caseData.completionBonuses || []).length) {
       score = Math.round(Math.max(0, Math.min(100, score + defenseAdjustment)));
     }
     var ending = caseData.resolveEnding(score, Math.random());
@@ -914,8 +929,8 @@ window.APXPages = window.APXPages || {};
           (selected ? ' aria-pressed="true"' : ' aria-pressed="false"') + '>' +
           '<strong>' + escapeHTML(argument.text) + '</strong><span>' +
           (argument.tags || []).map(escapeHTML).join(' · ') + '</span></button>' +
-        '<small data-law-case-defense-research>' + (missing.length ? 'Cần đọc: ' + escapeHTML(missing.join(' · ')) : '') + '</small>' +
-        '<small>' + (sources.length ? 'Căn cứ: ' + escapeHTML(sources.join(' · ')) : 'Không yêu cầu nguồn bổ sung') + '</small></article>';
+        (missing.length ? '<small data-law-case-defense-research>Cần đọc: ' + escapeHTML(missing.join(' · ')) + '</small>' : '') +
+        (sources.length ? '<small>Căn cứ: ' + escapeHTML(sources.join(' · ')) + '</small>' : '') + '</article>';
     }).join("");
     var minimumSelection = Number(defense.minimumSelection == null ? defense.selectionLimit : defense.minimumSelection);
     var complete = selectedIds.length >= minimumSelection &&
@@ -923,10 +938,13 @@ window.APXPages = window.APXPages || {};
     return '<section class="lawyer-final-arguments"><span class="eyebrow">BIỆN HỘ CUỐI · TỰ XÂY DỰNG HỒ SƠ</span>' +
       '<h3>' + escapeHTML(defense.title || "Chọn luận điểm") + '</h3>' +
       '<p>' + escapeHTML(defense.instruction || ("Chọn " + defense.selectionLimit + " luận điểm; hãy ưu tiên căn cứ phù hợp và xử lý cả điểm bất lợi.")) + '</p>' +
-      '<p>Đã chọn ' + selectedIds.length + '/' + escapeHTML(defense.selectionLimit) + '</p>' +
       '<div class="lawyer-final-argument-list">' + options + '</div>' +
       '<button class="button button-gold" type="button" data-law-case-action="finish" data-case-id="' +
-        escapeHTML(caseData.id) + '"' + (!complete ? ' disabled' : '') + '>BÀN GIAO HỒ SƠ BIỆN HỘ</button></section>';
+        escapeHTML(caseData.id) + '"' + (!complete ? ' disabled' : '') + '>KẾT THÚC VỤ ÁN</button>' +
+      (caseData.investigationActions.length
+        ? '<button class="button" type="button" data-law-case-action="reopen-investigation" data-case-id="' +
+          escapeHTML(caseData.id) + '">← QUAY LẠI ĐIỀU TRA VÀ MỞ CHỨNG CỨ</button>'
+        : '') + '</section>';
   }
 
   function renderFinalArguments(caseData, progress) {
@@ -1058,7 +1076,129 @@ window.APXPages = window.APXPages || {};
       : "Tiến độ tình huống " + (progress.currentQuestion + 1) + "/" + caseData.questions.length;
     return '<header class="page-heading"><span class="eyebrow">CA LÀM · LUẬT SƯ</span><h1>' + escapeHTML(caseData.meta.title) + '</h1><p>Đọc hồ sơ, xem chứng cứ và xử lý các tình huống để bàn giao ca.</p></header>' +
       '<section class="panel lawyer-case-career"><span>⚖️ ' + escapeHTML(state.career.activeJob.employer) + '</span><span>' + escapeHTML(caseProgressLabel) + '</span><span>Hồ sơ đang làm</span></section>' +
-      (caseData.id === "CASE_006" ? renderCase006Workspace(caseData, progress) : renderWorkspace(caseData, progress));
+      (caseData.id === "CASE_006"
+        ? renderCase006Workspace(caseData, progress)
+        : caseData.id === "CASE_007"
+          ? renderCase007Workspace(caseData, progress)
+          : caseData.id === "CASE_008"
+            ? renderCase008Workspace(caseData, progress)
+            : renderWorkspace(caseData, progress));
+  }
+
+  function renderCase008Workspace(caseData, progress) {
+    var body;
+    if (progress.phase === "intro") {
+      body = '<section class="lawyer-case-section"><span class="eyebrow">HỒ SƠ VỤ ÁN</span><h3>' +
+        escapeHTML(caseData.meta.title) + '</h3><p>' + escapeHTML(caseData.description) +
+        '</p><div class="lawyer-case-parties"><div><small>Khách hàng</small><strong>' +
+        escapeHTML(caseData.client.name) + '</strong><span>' + escapeHTML(caseData.client.occupation) +
+        '</span></div><div><small>Đối phương</small><strong>' + escapeHTML(caseData.opponent.name) +
+        '</strong><span>' + escapeHTML(caseData.opponent.occupation) + '</span></div></div>' +
+        '<button class="button button-gold" type="button" data-law-case-action="case008-start-meeting" data-case-id="CASE_008">NHẬN VỤ ÁN →</button></section>';
+    } else if (progress.phase === "meeting") {
+      var dialogue = (caseData.meetingDialogue || []).map(function (line) {
+        return '<div class="lawyer-case-dialogue' + (line.speaker === "Bạn" ? ' is-lawyer' : '') +
+          '"><strong>' + escapeHTML(line.speaker) + '</strong><p>' + escapeHTML(line.text) + '</p></div>';
+      }).join("");
+      var asked = progress.meetingQuestionsAsked || [];
+      var questions = (caseData.meetingQuestions || []).map(function (question) {
+        return '<button class="lawyer-case-choice lawyer-case-meeting-choice" type="button" data-law-case-action="case008-ask" data-case-id="CASE_008" data-meeting-question="' +
+          escapeHTML(question.id) + '"' + (asked.indexOf(question.id) >= 0 ? ' disabled' : '') +
+          '><strong>' + escapeHTML(question.title) + '</strong><span>' + escapeHTML(question.quote) + '</span></button>';
+      }).join("");
+      var responses = (progress.meetingResponses || []).map(function (response) {
+        return '<div class="lawyer-case-meeting-note"><strong>Thông tin mới</strong><p>' +
+          escapeHTML(response) + '</p></div>';
+      }).join("");
+      body = '<div class="lawyer-case-columns"><section class="lawyer-case-section"><span class="eyebrow">GẶP KHÁCH HÀNG · 18:40</span>' +
+        '<h3>Văn phòng luật sư</h3>' + dialogue + responses + '<div class="lawyer-case-choices">' + questions +
+        '</div><button class="button button-gold" type="button" data-law-case-action="case008-start-investigation" data-case-id="CASE_008">📂 NHẬN HỒ SƠ VÀ BẮT ĐẦU ĐIỀU TRA</button></section>' +
+        '<aside class="lawyer-case-section"><h3>📋 Ghi chú ban đầu</h3><ul>' +
+        (caseData.meetingNotes || []).map(function (note) { return '<li>' + escapeHTML(note) + '</li>'; }).join("") +
+        '</ul></aside></div>';
+    } else if (progress.phase === "investigation") {
+      var timeline = (caseData.timeline || []).map(function (item) {
+        return '<li><time>' + escapeHTML(item.date) + '</time><div><strong>' +
+          escapeHTML(item.title) + '</strong><p>' + escapeHTML(item.content) + '</p></div></li>';
+      }).join("");
+      body = '<div class="lawyer-case-columns"><main>' +
+        '<section class="lawyer-case-section"><span class="eyebrow">ĐIỀU TRA VỤ ÁN</span><h3>Phòng điều tra hồ sơ</h3><p>' +
+        escapeHTML(caseData.investigationInstruction) + '<strong> Còn ' +
+        progress.investigationTurnsRemaining + ' lượt điều tra</strong></p>' +
+        renderInvestigationStage(caseData, progress) + '</section></main>' +
+        '<aside class="lawyer-case-column"><section class="lawyer-case-section"><h3>📁 Chứng cứ</h3>' +
+        '<p class="lawyer-case-muted">Bấm vào từng tài liệu để đọc toàn bộ nội dung.</p>' +
+        renderEvidence(caseData, progress) + '</section><section class="lawyer-case-section"><h3>🕒 Dòng thời gian</h3>' +
+        '<ol class="lawyer-case-timeline">' + timeline + '</ol></section>' +
+        '<section class="lawyer-case-section"><h3>🧩 Tình tiết đã phát hiện</h3>' +
+        (progress.discoveries.length
+          ? '<ul>' + progress.discoveries.map(function (item) { return '<li>' + escapeHTML(item) + '</li>'; }).join("") + '</ul>'
+          : '<p class="lawyer-case-muted">Chưa phát hiện tình tiết đáng chú ý.</p>') +
+        '</section></aside></div>';
+    } else {
+      body = renderFinalDefense(caseData, progress);
+    }
+    return '<section class="panel lawyer-case-workspace"><div class="lawyer-case-workspace-head"><div><span class="eyebrow">VỤ ÁN 08 · CA LÀM · NGÀY GAME ' +
+      progress.startedDay + '</span><h2>' + escapeHTML(caseData.meta.title) +
+      '</h2></div><span class="lawyer-case-badge">Luật sư</span></div>' + body + '</section>';
+  }
+
+  function renderCase007Workspace(caseData, progress) {
+    var body;
+    if (progress.phase === "intro") {
+      body = '<section class="lawyer-case-section"><span class="eyebrow">HỒ SƠ VỤ ÁN</span><h3>' +
+        escapeHTML(caseData.meta.title) + '</h3><p>' + escapeHTML(caseData.description) +
+        '</p><div class="lawyer-case-parties"><div><small>Khách hàng</small><strong>' +
+        escapeHTML(caseData.client.name) + '</strong><span>' + escapeHTML(caseData.client.occupation) +
+        '</span></div><div><small>Đối phương</small><strong>' + escapeHTML(caseData.opponent.name) +
+        '</strong><span>' + escapeHTML(caseData.opponent.occupation) + '</span></div></div>' +
+        '<button class="button button-gold" type="button" data-law-case-action="case007-start-meeting" data-case-id="CASE_007">NHẬN VỤ ÁN →</button></section>';
+    } else if (progress.phase === "meeting") {
+      var dialogue = (caseData.meetingDialogue || []).map(function (line) {
+        return '<div class="lawyer-case-dialogue' + (line.speaker === "Bạn" ? ' is-lawyer' : '') +
+          '"><strong>' + escapeHTML(line.speaker) + '</strong><p>' + escapeHTML(line.text) + '</p></div>';
+      }).join("");
+      var asked = progress.meetingQuestionsAsked || [];
+      var questions = (caseData.meetingQuestions || []).map(function (question) {
+        return '<button class="lawyer-case-choice lawyer-case-meeting-choice" type="button" data-law-case-action="case007-ask" data-case-id="CASE_007" data-meeting-question="' +
+          escapeHTML(question.id) + '"' + (asked.indexOf(question.id) >= 0 ? ' disabled' : '') +
+          '><strong>' + escapeHTML(question.title) + '</strong><span>' + escapeHTML(question.quote) + '</span></button>';
+      }).join("");
+      var responses = (progress.meetingResponses || []).map(function (response) {
+        return '<div class="lawyer-case-meeting-note"><strong>Thông tin mới</strong><p>' +
+          escapeHTML(response) + '</p></div>';
+      }).join("");
+      body = '<div class="lawyer-case-columns"><section class="lawyer-case-section"><span class="eyebrow">GẶP KHÁCH HÀNG · 19:10</span>' +
+        '<h3>Văn phòng luật sư</h3>' + dialogue + responses + '<div class="lawyer-case-choices">' + questions +
+        '</div><button class="button button-gold" type="button" data-law-case-action="case007-start-investigation" data-case-id="CASE_007">📂 NHẬN HỒ SƠ VÀ BẮT ĐẦU ĐIỀU TRA</button></section>' +
+        '<aside class="lawyer-case-section"><h3>📋 Ghi chú ban đầu</h3><ul>' +
+        (caseData.meetingNotes || []).map(function (note) { return '<li>' + escapeHTML(note) + '</li>'; }).join("") +
+        '</ul></aside></div>';
+    } else if (progress.phase === "investigation") {
+      var timeline = (caseData.timeline || []).map(function (item) {
+        return '<li><time>' + escapeHTML(item.date) + '</time><div><strong>' +
+          escapeHTML(item.title) + '</strong><p>' + escapeHTML(item.content) + '</p></div></li>';
+      }).join("");
+      body = '<div class="lawyer-case-columns"><main>' +
+        '<section class="lawyer-case-section"><span class="eyebrow">ĐIỀU TRA VỤ ÁN</span><h3>Phòng điều tra hồ sơ</h3><p>' +
+        escapeHTML(caseData.investigationInstruction) + '<strong> Còn ' +
+        progress.investigationTurnsRemaining + ' lượt điều tra</strong></p>' +
+        renderInvestigationStage(caseData, progress) + '</section></main>' +
+        '<aside class="lawyer-case-column"><section class="lawyer-case-section"><h3>📁 Chứng cứ</h3>' +
+        '<p class="lawyer-case-muted">Bấm vào từng tài liệu để đọc toàn bộ nội dung.</p>' +
+        renderEvidence(caseData, progress) + '</section><section class="lawyer-case-section"><h3>🕒 Dòng thời gian</h3>' +
+        '<ol class="lawyer-case-timeline">' + timeline + '</ol></section>' +
+        '<section class="lawyer-case-section"><div class="lawyer-case-discoveries"><h3>🧩 Tình tiết đã phát hiện</h3>' +
+        (progress.discoveries.length
+          ? '<ul>' + progress.discoveries.map(function (item) { return '<li>' + escapeHTML(item) + '</li>'; }).join("") + '</ul>'
+          : '<p class="lawyer-case-muted">Chưa phát hiện tình tiết đáng chú ý.</p>') +
+        '</div></section></aside></div>';
+    } else {
+      body = renderFinalDefense(caseData, progress);
+    }
+    return '<section class="panel lawyer-case-workspace"><div class="lawyer-case-workspace-head"><div><span class="eyebrow">VỤ ÁN 07 · CA LÀM · NGÀY GAME ' +
+      progress.startedDay + '</span><h2>' + escapeHTML(caseData.meta.title) +
+      '</h2></div><span class="lawyer-case-badge">Luật sư</span></div>' + body + '</section>';
   }
 
   function renderCase006Workspace(caseData, progress) {
@@ -1082,7 +1222,7 @@ window.APXPages = window.APXPages || {};
         dialogue + (progress.meetingResponses || []).map(function (item) {
           return '<div class="lawyer-case-meeting-note"><strong>Thông tin mới</strong><p>' + escapeHTML(item) + '</p></div>';
         }).join("") + '<div class="lawyer-case-choices">' + answers.map(function (item) {
-          return '<button class="lawyer-case-choice" type="button" data-law-case-action="case006-ask" data-case-id="CASE_006" data-meeting-question="' +
+          return '<button class="lawyer-case-choice lawyer-case-meeting-choice" type="button" data-law-case-action="case006-ask" data-case-id="CASE_006" data-meeting-question="' +
             item.id + '"' + (asked.indexOf(item.id) >= 0 ? ' disabled' : '') + '><strong>' + escapeHTML(item.title) +
             '</strong><span>' + escapeHTML(item.quote) + '</span></button>';
         }).join("") + '</div><button class="button button-gold" type="button" data-law-case-action="case006-start-investigation" data-case-id="CASE_006">📂 NHẬN HỒ SƠ VÀ BẮT ĐẦU ĐIỀU TRA</button></section>' +
@@ -1159,6 +1299,71 @@ window.APXPages = window.APXPages || {};
       var progress = lawyer && lawyer.cases[caseData.id];
       if (!progress || progress.status !== "completed" || !progress.result || progress.result.rewardStatus === "paid") return;
       return claimCaseReward(caseData, progress);
+    }
+    if (action === "case007-start-meeting" || action === "case007-ask" ||
+        action === "case007-start-investigation") {
+      var case007Progress = lawyer && lawyer.cases[caseData.id];
+      if (!case007Progress || case007Progress.status !== "active" || caseData.id !== "CASE_007") return;
+      if (action === "case007-start-meeting" && case007Progress.phase === "intro") {
+        case007Progress.phase = "meeting";
+      } else if (action === "case007-ask" && case007Progress.phase === "meeting") {
+        var meetingQuestionId = button.dataset.meetingQuestion;
+        var meetingQuestion = (caseData.meetingQuestions || []).find(function (item) {
+          return item.id === meetingQuestionId;
+        });
+        if (!meetingQuestion) return window.APXGame.toast("Câu hỏi gặp khách hàng không hợp lệ.", "warning");
+        if (!Array.isArray(case007Progress.meetingQuestionsAsked)) case007Progress.meetingQuestionsAsked = [];
+        if (case007Progress.meetingQuestionsAsked.indexOf(meetingQuestionId) >= 0) return;
+        case007Progress.meetingQuestionsAsked.push(meetingQuestionId);
+        if (!Array.isArray(case007Progress.meetingResponses)) case007Progress.meetingResponses = [];
+        case007Progress.meetingResponses.push(meetingQuestion.response);
+        Object.keys(meetingQuestion.effects || {}).forEach(function (key) {
+          if (STAT_KEYS.indexOf(key) < 0) return;
+          case007Progress.stats[key] =
+            (Number(case007Progress.stats[key]) || 0) + Number(meetingQuestion.effects[key]);
+        });
+      } else if (action === "case007-start-investigation" && case007Progress.phase === "meeting") {
+        case007Progress.phase = "investigation";
+      } else {
+        return;
+      }
+      return persistAndRender();
+    }
+    if (action === "case008-start-meeting" || action === "case008-ask" ||
+        action === "case008-start-investigation") {
+      var case008Progress = lawyer && lawyer.cases[caseData.id];
+      if (!case008Progress || case008Progress.status !== "active" || caseData.id !== "CASE_008") return;
+      if (action === "case008-start-meeting" && case008Progress.phase === "intro") {
+        case008Progress.phase = "meeting";
+      } else if (action === "case008-ask" && case008Progress.phase === "meeting") {
+        var case008QuestionId = button.dataset.meetingQuestion;
+        var case008Question = (caseData.meetingQuestions || []).find(function (item) {
+          return item.id === case008QuestionId;
+        });
+        if (!case008Question) return window.APXGame.toast("Câu hỏi gặp khách hàng không hợp lệ.", "warning");
+        if (!Array.isArray(case008Progress.meetingQuestionsAsked)) case008Progress.meetingQuestionsAsked = [];
+        if (case008Progress.meetingQuestionsAsked.indexOf(case008QuestionId) >= 0) return;
+        case008Progress.meetingQuestionsAsked.push(case008QuestionId);
+        if (!Array.isArray(case008Progress.meetingResponses)) case008Progress.meetingResponses = [];
+        case008Progress.meetingResponses.push(case008Question.response);
+        Object.keys(case008Question.effects || {}).forEach(function (key) {
+          if (STAT_KEYS.indexOf(key) < 0) return;
+          case008Progress.stats[key] =
+            (Number(case008Progress.stats[key]) || 0) + Number(case008Question.effects[key]);
+        });
+      } else if (action === "case008-start-investigation" && case008Progress.phase === "meeting") {
+        case008Progress.phase = "investigation";
+      } else {
+        return;
+      }
+      return persistAndRender();
+    }
+    if (action === "reopen-investigation") {
+      var defenseProgress = lawyer && lawyer.cases[caseData.id];
+      if (!defenseProgress || defenseProgress.status !== "active" ||
+          defenseProgress.phase !== "defense" || !caseData.investigationActions.length) return;
+      defenseProgress.phase = "investigation";
+      return persistAndRender("Đã quay lại hồ sơ điều tra. Các luận điểm đã chọn vẫn được giữ lại.");
     }
     if (action === "choose") return chooseAnswer(caseData, button.dataset.questionId, button.dataset.choiceId);
     if (action === "choose-argument") return chooseFinalArgument(caseData, button.dataset.argumentId);
