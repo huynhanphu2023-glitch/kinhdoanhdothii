@@ -70,19 +70,19 @@
 .lawyer-case-research-hint { min-height: 14px; padding: 0 4px; color: var(--apx-muted); font-size: 10px; line-height: 1.4; }
 .lawyer-case-research-hint:empty { display: none; }
 .lawyer-case-analysis > .button { width: 100%; min-height: 44px; }
-.lawyer-final-arguments { margin-top: 14px; padding: 14px; border: 1px solid var(--apx-line); border-radius: 14px; background: rgba(255,255,255,.24); }
-.lawyer-final-arguments > h3 { margin: 5px 0; color: var(--apx-text); font-size: 16px; }
-.lawyer-final-arguments > p { margin: 0 0 12px; color: var(--apx-muted); font-size: 12px; line-height: 1.55; }
+.lawyer-final-arguments { margin-top: 14px; padding: 18px; border: 1px solid var(--apx-line); border-radius: 14px; background: rgba(255,255,255,.24); }
+.lawyer-final-arguments > h3 { margin: 7px 0; color: var(--apx-text); font-size: 21px; line-height: 1.4; }
+.lawyer-final-arguments > p { margin: 0 0 16px; color: var(--apx-muted); font-size: 15px; line-height: 1.65; }
 .lawyer-final-argument-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
-.lawyer-final-argument { min-width: 0; padding: 10px; border: 1px solid var(--apx-line); border-radius: 12px; background: rgba(255,255,255,.28); }
+.lawyer-final-argument { min-width: 0; padding: 14px; border: 1px solid var(--apx-line); border-radius: 12px; background: rgba(255,255,255,.28); }
 .lawyer-final-argument.is-selected { border-color: var(--apx-teal); background: rgba(113,129,106,.13); }
-.lawyer-final-argument-choice { display: grid; width: 100%; min-height: 0; gap: 7px; }
-.lawyer-final-argument-choice > strong { padding: 0; font-size: 13px; }
-.lawyer-final-argument-choice > span { display: block; flex: initial; height: auto; padding: 0; border-radius: 0; color: var(--apx-text-soft); background: transparent; font-size: 11px; font-weight: 400; line-height: 1.55; }
-.lawyer-final-argument > p { margin: 8px 0; color: var(--apx-text-soft); font-size: 11px; line-height: 1.55; }
+.lawyer-final-argument-choice { display: grid; width: 100%; min-height: 108px; gap: 9px; padding: 14px; }
+.lawyer-final-argument-choice > strong { padding: 0; font-size: 16px; line-height: 1.5; }
+.lawyer-final-argument-choice > span { display: block; flex: initial; height: auto; padding: 0; border-radius: 0; color: var(--apx-text-soft); background: transparent; font-size: 14px; font-weight: 400; line-height: 1.6; }
+.lawyer-final-argument > p { margin: 10px 0; color: var(--apx-text-soft); font-size: 14px; line-height: 1.6; }
 .lawyer-final-argument > p strong { color: var(--apx-text); }
-.lawyer-final-argument > small { display: block; color: var(--apx-muted); font-size: 10px; line-height: 1.5; }
-.lawyer-final-arguments > .button { width: 100%; min-height: 44px; margin-top: 10px; }
+.lawyer-final-argument > small { display: block; color: var(--apx-muted); font-size: 13px; line-height: 1.5; }
+.lawyer-final-arguments > .button { width: 100%; min-height: 52px; margin-top: 12px; font-size: 14px; }
 .lawyer-investigation-progress { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin: 10px 0; padding: 11px; border-radius: 12px; color: var(--apx-text-soft); background: rgba(197,139,90,.12); font-size: 12px; }
 .lawyer-investigation-progress strong { color: var(--apx-text); }
 .lawyer-case-progress-track { height: 7px; overflow: hidden; margin: 9px 0 12px; border-radius: 999px; background: rgba(139,111,90,.18); }
@@ -140,7 +140,8 @@
 .career-lawyer-entry .button { flex: 0 0 auto; }
 
 @media (max-width: 760px) {
-  .lawyer-case-columns { grid-template-columns: 1fr; }
+  .lawyer-case-columns,
+  .lawyer-final-argument-list { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
@@ -150,6 +151,8 @@
   .lawyer-case-review-grid,
   .lawyer-final-argument-list { grid-template-columns: 1fr; }
   .lawyer-case-choices { grid-template-columns: 1fr; }
+  .lawyer-final-arguments { padding: 15px; }
+  .lawyer-final-argument-list { grid-template-columns: 1fr; }
   .lawyer-case-result { padding: 14px; }
   .career-lawyer-entry { align-items: stretch; flex-direction: column; }
   .career-lawyer-entry .button { width: 100%; }
