@@ -5,19 +5,10 @@ Hiện Supabase chưa được cấu hình trong trình duyệt; game tiếp t�
 1. Trong Supabase Dashboard, kiểm tra Table Editor, SQL Editor, triggers và RLS hiện có. Migration chỉ tạo bảng `apx_*`, tự dừng nếu đối tượng đích đã tồn tại và không sửa/xóa các bảng khác. Nếu project đã có schema hồ sơ/save, cần kiểm tra và điều chỉnh trước khi chạy.
 2. Chạy `supabase/migrations/202609270001_apx_player_platform.sql` trong SQL Editor.
 3. Chạy tiếp `supabase/migrations/202609270002_apx_avatar_storage.sql` để tạo bucket avatar và giới hạn mỗi người chỉ tải/thay ảnh trong thư mục theo user ID của mình. Bucket công khai để ảnh hồ sơ xem được bằng URL; chỉ ảnh trong bucket này được công khai.
-4. OTP vẫn được gửi qua email; nó thay liên kết xác nhận bằng mã số. Để đăng ký bắt buộc mã OTP, vào **Authentication → Sign In / Providers → Email**, bật **Confirm email**. Sau đó vào **Authentication → Email Templates → Confirm signup** và đổi mẫu thành nội dung có mã, không dùng `{{ .ConfirmationURL }}`. Ví dụ:
-
-```html
-<h2>Mã xác nhận APX Business World</h2>
-<p>Nhập mã này trong game để xác nhận email:</p>
-<h1>{{ .Token }}</h1>
-<p>Nếu bạn không tạo tài khoản APX, hãy bỏ qua email này.</p>
-```
-
-   Giữ Confirm email bật: game gọi `verifyOtp` để kiểm tra mã nhập vào. Mã OTP và đường dẫn xác nhận là hai định dạng thư khác nhau. Dashboard project hiện báo cần cấu hình SMTP riêng mới sửa được mẫu email; nếu không có SMTP riêng, Supabase có thể tiếp tục gửi mẫu mặc định dạng liên kết và form OTP trong game sẽ không có mã để xác minh. Không gửi SMTP password/API secret qua chat hoặc đưa vào GitHub.
+4. Game không yêu cầu nhập mã OTP. Nếu **Confirm email** đang bật trong **Authentication → Sign In / Providers → Email**, người chơi cần mở liên kết xác nhận do Supabase gửi rồi đăng nhập. Để đăng ký và đăng nhập ngay mà không cần xác nhận email, tắt **Confirm email** trong Supabase. Việc tắt xác nhận email làm giảm khả năng kiểm tra quyền sở hữu địa chỉ email.
 
 5. Project URL và public anon/publishable key nằm trong `js/supabase-config.js`. Không dùng service_role trong ứng dụng trình duyệt.
-6. Thử đăng ký, nhập OTP, tải ảnh đại diện, khôi phục save trên thiết bị khác và gửi báo cáo.
+6. Thử đăng ký theo cài đặt xác nhận email, tải ảnh đại diện, khôi phục save trên thiết bị khác và gửi báo cáo.
 
 Mỗi tài khoản được tạo một hồ sơ cùng UUID nhân vật. Tiến trình game được lưu nguyên trạng trong JSONB. Giao diện Admin đã được gỡ khỏi game; các bảng quyền và audit cũ được giữ lại, không tự xóa dữ liệu. Nếu `apx-admin` đã deploy trước đó, hãy xóa Edge Function trong Supabase Dashboard hoặc deploy lại source đã vô hiệu hóa; source trong GitHub không tự thay đổi function đang chạy.
 
