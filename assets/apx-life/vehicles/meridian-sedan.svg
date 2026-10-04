@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Sedan Meridian màu bạc xanh</title>
+  <ellipse cx="320" cy="275" rx="229" ry="20" fill="#071118" opacity=".7"/><path d="m89 231 43-50q15-18 48-23l97-10 45-38h114q29 0 48 24l46 53 49 15 21 40-19 31H105z" fill="#728984" stroke="#d7c58f" stroke-width="5"/>
+  <path d="m294 153 42-34h91l42 49H272z" fill="#bad0c7"/><path d="M108 220h59m385 0h45" stroke="#f0d78b" stroke-width="10" stroke-linecap="round"/><circle cx="201" cy="251" r="37" fill="#10191e" stroke="#afbab0" stroke-width="9"/><circle cx="490" cy="251" r="37" fill="#10191e" stroke="#afbab0" stroke-width="9"/><path d="M372 157v70" stroke="#34494a" stroke-width="5"/>
+</svg>

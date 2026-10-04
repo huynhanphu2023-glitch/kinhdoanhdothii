@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Sedan Solis màu xanh đậm</title>
+  <ellipse cx="320" cy="275" rx="224" ry="20" fill="#071118" opacity=".7"/><path d="M105 235 139 187q14-19 42-23l70-13 47-50h113q27 0 46 23l45 53 44 14 19 44-19 29H121z" fill="#456b68" stroke="#d1b976" stroke-width="5"/>
+  <path d="m263 157 45-42h92l42 52H244z" fill="#abc2b7"/><path d="M125 222h53m340 0h42" stroke="#e5ca78" stroke-width="10" stroke-linecap="round"/><circle cx="205" cy="250" r="36" fill="#10191e" stroke="#9daaa3" stroke-width="9"/><circle cx="472" cy="250" r="36" fill="#10191e" stroke="#9daaa3" stroke-width="9"/><path d="M324 163v66" stroke="#1e3439" stroke-width="5"/>
+</svg>
