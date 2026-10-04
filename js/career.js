@@ -652,9 +652,11 @@ window.APXPages = window.APXPages || {};
   }
   function offerCard(offer, state) {
     var job = JOBS[offer.type];
-    var profession = ensureState(state).professions[offer.type];
-    var alreadyPaid = Number(ensureState(state).lastPaidDay) === Number(state.day);
-    return '<article class="career-job-card panel"><div class="career-job-top"><span class="career-job-icon" aria-hidden="true">' + job.icon + '</span><span class="career-job-rank">Cấp nghề ' + profession.level + '</span></div><span class="eyebrow">' + esc(offer.employer) + '</span><h3>' + esc(offer.title) + '</h3><p>' + esc(job.shift) + '</p><div class="career-job-reward"><span>Lương ca 14 giờ<strong>' + money(offer.basePay) + '</strong></span><span>KPI tối đa · ca 14 giờ<strong>' + money(offer.bonusPay) + '</strong></span><span>Lưu lượng<strong>Theo giờ game</strong></span></div><button class="button button-gold" type="button" data-career-action="apply" data-job="' + offer.type + '">Ứng tuyển</button>' + (alreadyPaid ? '<small class="career-muted">Đã nhận lương hôm nay; có thể ứng tuyển, bắt đầu ca từ ngày game kế tiếp.</small>' : '') + '</article>';
+    var career = ensureState(state);
+    var profession = career.professions[offer.type];
+    var alreadyPaid = Number(career.lastPaidDay) === Number(state.day);
+    var hasCurrentWork = Boolean(career.employment.current || career.activeJob);
+    return '<article class="career-job-card panel"><div class="career-job-top"><span class="career-job-icon" aria-hidden="true">' + job.icon + '</span><span class="career-job-rank">Cấp nghề ' + profession.level + '</span></div><span class="eyebrow">' + esc(offer.employer) + '</span><h3>' + esc(offer.title) + '</h3><p>' + esc(job.shift) + '</p><div class="career-job-reward"><span>Lương ca 14 giờ<strong>' + money(offer.basePay) + '</strong></span><span>KPI tối đa · ca 14 giờ<strong>' + money(offer.bonusPay) + '</strong></span><span>Lưu lượng<strong>Theo giờ game</strong></span></div><button class="button button-gold" type="button" data-career-action="apply" data-job="' + offer.type + '"' + (hasCurrentWork ? ' disabled' : '') + '>' + (hasCurrentWork ? 'Đang có công việc' : 'Ứng tuyển') + '</button>' + (hasCurrentWork ? '<small class="career-muted">Hãy kết thúc ca hoặc hủy hợp đồng hiện tại trước khi ứng tuyển nghề khác.</small>' : alreadyPaid ? '<small class="career-muted">Đã nhận lương hôm nay; có thể ứng tuyển, bắt đầu ca từ ngày game kế tiếp.</small>' : '') + '</article>';
   }
   function careerLink(page, label, style) {
     return '<a class="button ' + (style || '') + '" href="#" data-action="page" data-section="career" data-page="' + page + '">' + label + '</a>';
@@ -706,14 +708,17 @@ window.APXPages = window.APXPages || {};
   }
   function boardPage(state) {
     var career = ensureState(state);
-    if (career.activeJob) return activeShift(state, career.activeJob);
     if (career.employment.pending) return contractDocument(state, career.employment.pending, false);
-    if (career.employment.current) return currentJobPage(state);
     var offers = offerList(state);
+    var workStatus = career.activeJob
+      ? '<section class="panel career-muted"><strong>Bạn đang trong ca làm tại ' + esc(career.activeJob.employer) + '.</strong> <a href="#" data-action="page" data-section="career" data-page="current">Quay lại ca làm</a></section>'
+      : career.employment.current
+        ? '<section class="panel career-muted"><strong>Bạn đang có hợp đồng tại ' + esc(career.employment.current.employer) + '.</strong> <a href="#" data-action="page" data-section="career" data-page="current">Quản lý công việc hiện tại</a></section>'
+        : '';
     return '<header class="page-heading"><span class="eyebrow">SỰ NGHIỆP · VIỆC LÀM NPC</span><h1>Tìm công việc</h1><p>Ứng tuyển vào một công ty NPC, xem điều khoản rồi ký hợp đồng trước khi bắt đầu đi làm.</p></header>' +
-      progressPanel(state) + dailyReportCard(career.dailyReports[0]) + resultCard(career.history[0]) +
+      workStatus + progressPanel(state) + dailyReportCard(career.dailyReports[0]) + resultCard(career.history[0]) +
       '<section class="career-job-board"><div class="section-title-row"><div><span class="eyebrow">ĐANG TUYỂN · NGÀY GAME ' + Number(state.day || 1) + '</span><h2>Ứng tuyển một nghề chính</h2><p>Đơn đến theo giờ hoạt động, giờ cao điểm và đặc thù công việc.</p></div><span class="career-job-count">' + offers.length + ' vị trí</span></div><div class="career-job-grid">' + offers.map(function (offer) { return offerCard(offer, state); }).join('') + '</div></section>' +
-      '<section class="panel career-founder-progress"><div><span class="eyebrow">MỤC TIÊU DÀI HẠN</span><h2>Trở thành nhà sáng lập</h2><p>Mở công ty khi đạt cấp sự nghiệp 5, hoàn thành 8 ca và có tối thiểu ' + money(FOUNDING_COST) + '.</p></div><div class="career-founder-meter"><strong>' + Math.min(8, career.completedJobs) + ' / 8</strong><span>ca làm đã xong</span></div></section>' + cookbook();
+      '<section class="panel career-founder-progress"><div><span class="eyebrow">MỤC TIÊU DÀI HẠN</span><h2>Trở thành nhà sáng lập</h2><p>Mở công ty khi đạt cấp sự nghiệp 5, hoàn thành 8 ca và có tối thiểu ' + money(firstCompanyFoundingCost()) + '.</p></div><div class="career-founder-meter"><strong>' + Math.min(8, career.completedJobs) + ' / 8</strong><span>ca làm đã xong</span></div></section>' + cookbook();
   }
   function activeShift(state, active) {
     if (active.type === "lawyer" && window.APXLawyerCases) return window.APXLawyerCases.renderShift(state);
@@ -1398,10 +1403,12 @@ window.APXPages = window.APXPages || {};
   }
   function finishLawyerCase(state, score) {
     var career = ensureState(state), active = career.activeJob;
-    if (!active || active.type !== "lawyer" || !active.gameplay || !active.gameplay.caseMode) {
+    if (!active || active.type !== "lawyer") {
       window.APXGame.toast("Không có ca Luật sư đang hoạt động để bàn giao.", "warning");
       return null;
     }
+    if (!active.gameplay) active.gameplay = { version: 3, caseMode: true };
+    else active.gameplay.caseMode = true;
     active.score = Math.max(0, Math.min(100, Number(score) || 0));
     active.round = 100;
     active.totalOrders = 100;

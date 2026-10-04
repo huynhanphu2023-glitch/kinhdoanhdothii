@@ -14,7 +14,7 @@
   var pendingQuestClaims = Object.create(null);
   var lastSyncedGameState = null;
   var pageMessage = "";
-  var pendingOtpEmail = sessionStorage.getItem("apx-pending-otp-email") || "";
+  sessionStorage.removeItem("apx-pending-otp-email");
   var selectedPlayer = null;
   var adminData = null;
 
@@ -639,16 +639,6 @@
             )
       ) +
 
-      (pendingOtpEmail ? card(
-        "Nhập mã OTP trong email",
-        "Mã xác nhận đã được gửi tới " + esc(pendingOtpEmail) + ". Nhập mã để kích hoạt tài khoản.",
-        '<form data-form="verify-otp" class="apx-account-form">' +
-          '<label class="apx-account-field"><span>Mã OTP</span><input name="token" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,8}" minlength="6" maxlength="8" placeholder="Nhập mã trong email" required></label>' +
-          '<button class="button button-primary" type="submit">Xác nhận mã</button>' +
-          '<button class="button" type="button" data-action-account="resend-otp">Gửi lại mã</button>' +
-        '</form>'
-      ) : "") +
-
       (profile ? profileView() : "") +
       status()
     );
@@ -1212,38 +1202,13 @@
         }
 
         if (sign.data.session) {
-          await db.auth.signOut();
-          throw new Error(
-            "Supabase đang bỏ qua OTP. Bật Confirm email trong Supabase để bắt buộc nhập mã xác nhận."
-          );
+          await syncAccount();
+          pageMessage = "Tạo tài khoản thành công. Bạn đã đăng nhập.";
+        } else {
+          pageMessage =
+            "Tài khoản đã được tạo. Hãy mở liên kết xác nhận trong email rồi đăng nhập. " +
+            "Nếu muốn bỏ xác nhận email, hãy tắt Confirm email trong Supabase.";
         }
-
-        pendingOtpEmail = String(data.email || "").trim().toLowerCase();
-        sessionStorage.setItem("apx-pending-otp-email", pendingOtpEmail);
-        pageMessage =
-          "Đã gửi mã OTP tới email. Mở thư, nhập mã bên dưới để hoàn tất đăng ký.";
-
-      } else if (kind === "verify-otp") {
-        if (!pendingOtpEmail) {
-          throw new Error("Hãy đăng ký email trước để nhận mã OTP.");
-        }
-
-        var token = String(data.token || "").replace(/\s+/g, "");
-        if (!/^[0-9]{6,8}$/.test(token)) {
-          throw new Error("Mã OTP cần có từ 6 đến 8 chữ số.");
-        }
-
-        var verification = await db.auth.verifyOtp({
-          email: pendingOtpEmail,
-          token: token,
-          type: "email"
-        });
-        if (verification.error) throw verification.error;
-
-        pendingOtpEmail = "";
-        sessionStorage.removeItem("apx-pending-otp-email");
-        await syncAccount();
-        pageMessage = "Xác nhận OTP thành công. Nhân vật đã được kích hoạt.";
 
       } else if (kind === "login") {
         var login =
@@ -1495,21 +1460,6 @@
 
         pageMessage =
           "Đã đăng xuất. Tiến trình trên thiết bị vẫn được giữ.";
-
-      } else if (action === "resend-otp") {
-        if (!pendingOtpEmail) {
-          throw new Error("Chưa có email chờ xác nhận. Hãy gửi lại biểu mẫu đăng ký.");
-        }
-
-        var resendDb = await supabase();
-        var resendResult = await resendDb.auth.resend({
-          type: "signup",
-          email: pendingOtpEmail
-        });
-        if (resendResult.error) throw resendResult.error;
-
-        pageMessage =
-          "Đã gửi lại mã. Kiểm tra cả thư rác; chờ một phút trước lần gửi tiếp theo.";
 
       } else if (action === "admin-refresh") {
         adminData =
