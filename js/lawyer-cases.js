@@ -1308,6 +1308,17 @@ window.APXPages = window.APXPages || {};
         escapeHTML(caseData.id) + '">Quay lại game</button></header>' +
         '<iframe class="lawyer-case-game-frame" src="' + escapeHTML(caseData.embeddedUrl) +
         '" title="' + escapeHTML(caseData.meta.title) + '" allow="fullscreen"></iframe></section>';
+      var gameFrame = gameRoot.querySelector(".lawyer-case-game-frame");
+      if (gameFrame) {
+        gameFrame.addEventListener("load", function () {
+          if (!gameFrame.contentWindow) return;
+          gameFrame.contentWindow.addEventListener("keydown", function (frameEvent) {
+            if (frameEvent.key !== "Escape") return;
+            frameEvent.preventDefault();
+            gameRoot.replaceChildren();
+          });
+        }, { once: true });
+      }
       var closeButton = gameRoot.querySelector('[data-law-case-action="close-embedded"]');
       if (closeButton) closeButton.focus();
       return;
