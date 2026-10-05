@@ -367,6 +367,9 @@
     }
 
     updateTopbar();
+    if (window.APXCommunity && typeof window.APXCommunity.renderChatWidget === "function") {
+      window.APXCommunity.renderChatWidget();
+    }
   }
 
   /*

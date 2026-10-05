@@ -12,6 +12,9 @@ window.APXPages = window.APXPages || {};
   var rewardMailCache = null;
   var rewardMailPending = false;
   var rewardMailStatus = "";
+  var chatWidgetOpen = false;
+  var chatWidgetDrag = null;
+  var chatWidgetSuppressClick = false;
 
   function esc(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
@@ -52,6 +55,7 @@ window.APXPages = window.APXPages || {};
     }).finally(function () {
       pending[page] = false;
       if (currentPage() === page && window.APXGame) window.APXGame.render();
+      if (page === "global-chat") renderChatWidget();
     });
   }
   function heading(title, detail) {
@@ -133,15 +137,113 @@ window.APXPages = window.APXPages || {};
       '<section class="public-profile-section"><div class="section-title-row"><div><span class="eyebrow">HỆ SINH THÁI</span><h3>Doanh nghiệp</h3></div><span>' + (p.company_rank ? 'Hạng BXH #' + profileNumber(p.company_rank) : '') + '</span></div><div class="public-company-grid">' + companyCards + '</div></section>' +
       '<section class="public-profile-section"><div class="section-title-row"><div><span class="eyebrow">CỘT MỐC</span><h3>Thành tựu & huy hiệu</h3></div></div><div class="community-achievement-grid">' + (achievementCards || '<p class="community-note">Chưa có dữ liệu thành tựu.</p>') + '</div></section></section>';
   }
-  function chatMessages(rows, direct) {
+  function chatMessages(rows, direct, plainIdentity) {
     if (!rows.length) return '<p class="community-empty-chat">Chưa có tin nhắn. Hãy bắt đầu trò chuyện.</p>';
     return rows.map(function (item) {
       var time = item.created_at ? new Date(item.created_at).toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" }) : "";
-      var identity = item.character_id
+      var identity = item.character_id && !plainIdentity
         ? '<button class="community-chat-profile" type="button" data-action-community="profile" data-id="' + esc(item.character_id) + '"><i class="community-avatar">' + safeAvatar(item.avatar_url, item.display_name) + '</i><strong>' + esc(item.display_name || "Người chơi") + '</strong></button>'
         : '<i class="community-avatar">' + safeAvatar(item.avatar_url, item.display_name) + '</i><strong>' + esc(item.display_name || "Người chơi") + '</strong>';
       return '<article class="community-chat-message">' + identity + '<div><div class="community-chat-meta"><time>' + esc(time) + '</time></div><p>' + esc(item.body || item.message || "") + '</p></div></article>';
     }).join("");
+  }
+  function renderChatWidget() {
+    var root = document.getElementById("globalChatWidgetRoot");
+    if (!root) return;
+    var draft = root.querySelector("#globalChatBubbleForm textarea");
+    var draftValue = draft ? draft.value : "";
+    var draftFocused = draft && document.activeElement === draft;
+    var draftSelection = draftFocused ? [draft.selectionStart, draft.selectionEnd] : null;
+    var list = root.querySelector(".global-chat-widget-list");
+    var hadList = Boolean(list);
+    var scrollPosition = list ? list.scrollTop : 0;
+    var content = "";
+    if (chatWidgetOpen) {
+      if (!signedIn()) {
+        content = '<section class="global-chat-widget-panel" aria-labelledby="globalChatWidgetTitle"><header class="global-chat-widget-header" data-chat-drag-handle><strong id="globalChatWidgetTitle">Chat tổng</strong><button type="button" class="global-chat-widget-close" data-global-chat-action="close" aria-label="Đóng chat">×</button></header><p class="global-chat-widget-locked">Đăng nhập để xem và gửi tin nhắn trong cộng đồng.</p><button class="button button-gold" type="button" data-action="section" data-section="account">Mở tài khoản</button></section>';
+      } else {
+        fetchPage("global-chat", false);
+        var rows = cache["global-chat"] || [];
+        var chatStatus = status["global-chat"];
+        content = '<section class="global-chat-widget-panel" aria-labelledby="globalChatWidgetTitle"><header class="global-chat-widget-header" data-chat-drag-handle><div><strong id="globalChatWidgetTitle">Chat tổng</strong><small>Mọi người trong cộng đồng APX</small></div><div class="global-chat-widget-controls"><button type="button" class="global-chat-widget-close" data-global-chat-action="refresh" aria-label="Làm mới chat">↻</button><button type="button" class="global-chat-widget-close" data-global-chat-action="close" aria-label="Đóng chat">×</button></div></header>' +
+          (chatStatus ? '<p class="global-chat-widget-status" role="status">' + esc(chatStatus) + '</p>' : '') +
+          '<div class="community-chat-list global-chat-widget-list">' + chatMessages(rows, false, true) + '</div>' +
+          '<form id="globalChatBubbleForm" class="community-chat-form global-chat-widget-form"><textarea name="body" maxlength="500" placeholder="Viết tin nhắn…" aria-label="Tin nhắn chat tổng" required></textarea><button class="button button-gold" type="submit"' + (pending.send ? " disabled" : "") + '>Gửi</button></form></section>';
+      }
+    }
+    root.innerHTML = content + '<button type="button" class="global-chat-widget-launcher' + (chatWidgetOpen ? " is-open" : "") + '" data-global-chat-action="toggle" data-chat-drag-handle aria-expanded="' + (chatWidgetOpen ? "true" : "false") + '" aria-label="' + (chatWidgetOpen ? "Đóng chat tổng" : "Mở chat tổng") + '"><span aria-hidden="true">💬</span><strong>Chat tổng</strong></button>';
+    var updatedList = root.querySelector(".global-chat-widget-list");
+    if (updatedList) updatedList.scrollTop = hadList ? scrollPosition : updatedList.scrollHeight;
+    var updatedDraft = root.querySelector("#globalChatBubbleForm textarea");
+    if (updatedDraft) {
+      updatedDraft.value = draftValue;
+      if (draftFocused) {
+        updatedDraft.focus();
+        updatedDraft.setSelectionRange(draftSelection[0], draftSelection[1]);
+      }
+    }
+  }
+  function handleChatWidgetClick(event) {
+    var button = event.target.closest("[data-global-chat-action]");
+    if (!button) return;
+    event.preventDefault();
+    var action = button.dataset.globalChatAction;
+    if (action === "toggle") {
+      if (chatWidgetSuppressClick) {
+        chatWidgetSuppressClick = false;
+        return;
+      }
+      chatWidgetOpen = !chatWidgetOpen;
+      if (chatWidgetOpen && signedIn()) fetchPage("global-chat", false);
+    } else if (action === "close") {
+      chatWidgetOpen = false;
+    } else if (action === "refresh") {
+      delete cache["global-chat"];
+      fetchPage("global-chat", true);
+    }
+    renderChatWidget();
+  }
+  function startChatWidgetDrag(event) {
+    var handle = event.target.closest("[data-chat-drag-handle]");
+    if (!handle || event.button !== 0 || event.target.closest("button:not([data-global-chat-action='toggle'])")) return;
+    var root = document.getElementById("globalChatWidgetRoot");
+    if (!root) return;
+    var rect = root.getBoundingClientRect();
+    chatWidgetDrag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, left: rect.left, top: rect.top, moved: false };
+    handle.setPointerCapture(event.pointerId);
+  }
+  function moveChatWidget(event) {
+    if (!chatWidgetDrag || event.pointerId !== chatWidgetDrag.pointerId) return;
+    var dx = event.clientX - chatWidgetDrag.startX;
+    var dy = event.clientY - chatWidgetDrag.startY;
+    if (!chatWidgetDrag.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+    chatWidgetDrag.moved = true;
+    var root = document.getElementById("globalChatWidgetRoot");
+    if (!root) return;
+    var left = Math.max(8, Math.min(window.innerWidth - root.offsetWidth - 8, chatWidgetDrag.left + dx));
+    var top = Math.max(8, Math.min(window.innerHeight - root.offsetHeight - 8, chatWidgetDrag.top + dy));
+    root.style.left = left + "px";
+    root.style.top = top + "px";
+    root.style.right = "auto";
+    root.style.bottom = "auto";
+    root.classList.add("is-dragging");
+  }
+  function endChatWidgetDrag(event) {
+    if (!chatWidgetDrag || event.pointerId !== chatWidgetDrag.pointerId) return;
+    if (chatWidgetDrag.moved) {
+      chatWidgetSuppressClick = true;
+      window.setTimeout(function () { chatWidgetSuppressClick = false; }, 0);
+    }
+    chatWidgetDrag = null;
+    var root = document.getElementById("globalChatWidgetRoot");
+    if (root) root.classList.remove("is-dragging");
+  }
+  function keepChatWidgetInViewport() {
+    var root = document.getElementById("globalChatWidgetRoot");
+    if (!root || !root.style.left || !root.style.top) return;
+    var rect = root.getBoundingClientRect();
+    root.style.left = Math.max(8, Math.min(window.innerWidth - rect.width - 8, rect.left)) + "px";
+    root.style.top = Math.max(8, Math.min(window.innerHeight - rect.height - 8, rect.top)) + "px";
   }
   function globalChat() {
     fetchPage("global-chat", false);
@@ -290,26 +392,40 @@ window.APXPages = window.APXPages || {};
       window.APXGame.render();
     }
   });
+  document.addEventListener("click", handleChatWidgetClick);
+  document.addEventListener("pointerdown", startChatWidgetDrag);
+  document.addEventListener("pointermove", moveChatWidget);
+  document.addEventListener("pointerup", endChatWidgetDrag);
+  document.addEventListener("pointercancel", endChatWidgetDrag);
+  window.addEventListener("resize", keepChatWidgetInViewport);
   document.addEventListener("submit", function (event) {
     var form = event.target;
-    if (!form || (form.id !== "globalChatForm" && form.id !== "directChatForm")) return;
+    if (!form || (form.id !== "globalChatForm" && form.id !== "globalChatBubbleForm" && form.id !== "directChatForm")) return;
     event.preventDefault();
     var body = String(form.elements.body.value || "").trim();
     if (!body || body.length > 500 || pending.send) return;
+    var isGlobalChat = form.id === "globalChatForm" || form.id === "globalChatBubbleForm";
     pending.send = true;
+    var submitButton = form.querySelector('[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
     client().then(function (db) {
-      return form.id === "globalChatForm"
+      return isGlobalChat
         ? db.rpc("apx_global_chat_send", { p_body: body })
         : db.rpc("apx_send_direct_message", { p_character_id: peer.character_id, p_body: body });
     }).then(function (result) {
       if (result.error) throw result.error;
       form.reset();
-      if (form.id === "globalChatForm") { cache["global-chat"] = null; fetchPage("global-chat", true); }
+      if (isGlobalChat) { cache["global-chat"] = null; fetchPage("global-chat", true); }
       else { cache.dm = null; openDirectMessages(peer.character_id, peer.display_name, peer.avatar_url); }
     }).catch(function (error) {
-      status[form.id === "globalChatForm" ? "global-chat" : "dm"] = error && error.message ? error.message : "Không gửi được tin nhắn.";
-      if (window.APXGame) window.APXGame.render();
-    }).finally(function () { pending.send = false; });
+      status[isGlobalChat ? "global-chat" : "dm"] = error && error.message ? error.message : "Không gửi được tin nhắn.";
+      if (isGlobalChat) renderChatWidget();
+      if (window.APXGame && (!isGlobalChat || currentPage() === "global-chat")) window.APXGame.render();
+    }).finally(function () {
+      pending.send = false;
+      renderChatWidget();
+    });
   });
+  window.APXCommunity = { renderChatWidget: renderChatWidget };
   window.APXPages.community = render;
 })();
