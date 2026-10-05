@@ -751,19 +751,22 @@ window.APXPages = window.APXPages || {};
     if (!data.length) return '<div class="panel lawyer-case-empty">Chưa có hồ sơ vụ án nào được đăng ký.</div>';
     return '<div class="lawyer-case-list">' + data.map(function (caseData) {
       var standalone = Boolean(caseData.standaloneUrl);
-      var issue = standalone ? "" : validateCase(caseData);
+      var embedded = Boolean(caseData.embeddedUrl);
+      var issue = standalone || embedded ? "" : validateCase(caseData);
       var progress = lawyer.cases[caseData.id];
-      var status = standalone ? "Hồ sơ gốc" : progress && progress.status === "completed" ? "Hoàn thành" : progress ? "Đang làm" : "Chưa làm";
+      var status = embedded ? "Trong game" : standalone ? "Hồ sơ gốc" : progress && progress.status === "completed" ? "Hoàn thành" : progress ? "Đang làm" : "Chưa làm";
       var blocked = !standalone && lawyer.activeCaseId && lawyer.activeCaseId !== caseData.id && !progress;
       var action = progress && progress.status === "completed" ? "result" : "start";
-      var label = standalone ? "MỞ MINI-GAME GỐC →" : progress && progress.status === "completed" ? "Xem kết quả" : progress ? "Tiếp tục hồ sơ" : "Nhận vụ án";
-      if (!standalone && !employedAsLawyer && !progress) label = "Nhận việc Luật sư để mở";
+      var label = embedded ? "CHƠI VỤ ÁN →" : standalone ? "MỞ MINI-GAME GỐC →" : progress && progress.status === "completed" ? "Xem kết quả" : progress ? "Tiếp tục hồ sơ" : "Nhận vụ án";
+      if (!standalone && !embedded && !employedAsLawyer && !progress) label = "Nhận việc Luật sư để mở";
       return '<article class="panel lawyer-case-card"><div class="lawyer-case-card-top"><span class="lawyer-case-icon" aria-hidden="true">⚖️</span><span class="lawyer-case-status">' + escapeHTML(status) + '</span></div>' +
         '<span class="eyebrow">VỤ ÁN ' + String(data.indexOf(caseData) + 1).padStart(2, "0") + '</span>' +
         '<span class="eyebrow">' + escapeHTML(caseData.meta.category || "Vụ án") + ' · ' + escapeHTML(caseData.id) + '</span><h2>' + escapeHTML(caseData.meta.title) + '</h2>' +
         '<div class="lawyer-case-meta"><span>Độ khó<strong>' + escapeHTML(caseData.meta.difficulty || "—") + '</strong></span><span>Thù lao hồ sơ<strong>' + money(caseData.meta.reward) + '</strong></span><span>EXP<strong>+' + escapeHTML(caseData.meta.exp || 0) + '</strong></span></div>' +
         (issue ? '<p class="lawyer-case-error">' + escapeHTML(issue) + '</p>' : '') +
-        (standalone
+        (embedded
+          ? '<button class="button button-gold" type="button" data-law-case-action="open-embedded" data-case-id="' + escapeHTML(caseData.id) + '">' + escapeHTML(label) + '</button>'
+          : standalone
           ? '<a class="button button-gold" href="' + escapeHTML(caseData.standaloneUrl) + '" target="_blank" rel="noopener">' + escapeHTML(label) + '</a>'
           : '<button class="button button-gold" type="button" data-law-case-action="' + action + '" data-case-id="' + escapeHTML(caseData.id) + '"' + (issue || blocked || (!employedAsLawyer && (!progress || progress.status !== "completed")) ? " disabled" : "") + '>' + escapeHTML(blocked ? "Hoàn tất hồ sơ đang mở trước" : label) + '</button>') +
         '</article>';
@@ -1294,6 +1297,26 @@ window.APXPages = window.APXPages || {};
     var caseData = findCase(button.dataset.caseId);
     var action = button.dataset.lawCaseAction;
     if (!caseData) return window.APXGame.toast("Không tìm thấy dữ liệu vụ án.", "warning");
+    if (action === "open-embedded") {
+      if (!caseData.embeddedUrl) return window.APXGame.toast("Không tìm thấy mini-game của vụ án.", "warning");
+      var gameRoot = document.getElementById("lawyerCaseGameRoot");
+      if (!gameRoot) return window.APXGame.toast("Không thể mở mini-game trong game.", "warning");
+      gameRoot.innerHTML = '<section class="lawyer-case-game-overlay" role="dialog" aria-modal="true" aria-label="' +
+        escapeHTML(caseData.meta.title) + '">' +
+        '<header class="lawyer-case-game-toolbar"><strong>' + escapeHTML(caseData.meta.title) +
+        '</strong><button class="button" type="button" data-law-case-action="close-embedded" data-case-id="' +
+        escapeHTML(caseData.id) + '">Quay lại game</button></header>' +
+        '<iframe class="lawyer-case-game-frame" src="' + escapeHTML(caseData.embeddedUrl) +
+        '" title="' + escapeHTML(caseData.meta.title) + '" allow="fullscreen"></iframe></section>';
+      var closeButton = gameRoot.querySelector('[data-law-case-action="close-embedded"]');
+      if (closeButton) closeButton.focus();
+      return;
+    }
+    if (action === "close-embedded") {
+      var embeddedRoot = document.getElementById("lawyerCaseGameRoot");
+      if (embeddedRoot) embeddedRoot.replaceChildren();
+      return;
+    }
     if (action === "start") return startCase(caseData);
     var state = gameState(), lawyer = state && lawyerState(state);
     if (action === "result") {
@@ -1425,6 +1448,13 @@ window.APXPages = window.APXPages || {};
   document.addEventListener("input", function (event) {
     var input = event.target.closest("[data-law-case-search]");
     if (input) applyLibraryFilter(input);
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") return;
+    var gameRoot = document.getElementById("lawyerCaseGameRoot");
+    if (!gameRoot || !gameRoot.firstElementChild) return;
+    gameRoot.replaceChildren();
   });
 
   document.addEventListener("toggle", function (event) {
