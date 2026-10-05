@@ -1,6 +1,6 @@
 "use strict";
 
-var CACHE_NAME = "apx-pwa-shell-v35";
+var CACHE_NAME = "apx-pwa-shell-v36";
 var APP_SHELL = [
   "./",
   "./index.html",
