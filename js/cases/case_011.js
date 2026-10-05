@@ -15,7 +15,7 @@ var CASE_011 = {
     reward: 0,
     exp: 0
   },
-  standaloneUrl: "js/cases/case_011.html"
+  embeddedUrl: "js/cases/case_011.html"
 };
 
 window.APX_LAW_CASES = window.APX_LAW_CASES || [];
