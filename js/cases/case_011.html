@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>APX Lawyer — Vụ án 011: Sổ sách hai hệ thống</title>
+
+<style>
+:root{
+  --bg:#f3e9dc;
+  --card:#fffaf3;
+  --brown:#765746;
+  --brown2:#9b765d;
+  --dark:#3d3029;
+  --line:#dfcdbc;
+  --green:#66866d;
+  --red:#a65b52;
+  --gold:#b38a4d;
+  --blue:#687f9d;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--dark);
+  font-family:Arial,sans-serif;
+}
+
+.app{
+  max-width:920px;
+  margin:auto;
+  min-height:100vh;
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:var(--brown);
+  color:#fff;
+  padding:17px;
+  box-shadow:0 4px 18px #0002;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-weight:900;
+}
+
+.case{
+  background:#ffffff20;
+  border:1px solid #ffffff35;
+  border-radius:20px;
+  padding:7px 11px;
+  font-size:12px;
+}
+
+.progress{
+  margin-top:12px;
+  height:6px;
+  background:#ffffff25;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.progress span{
+  display:block;
+  height:100%;
+  width:0;
+  background:#f2d49b;
+  transition:.4s;
+}
+
+main{
+  padding:17px;
+}
+
+.screen{
+  display:none;
+  animation:appear .25s ease;
+}
+
+.screen.active{
+  display:block;
+}
+
+@keyframes appear{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
+
+.hero{
+  background:linear-gradient(135deg,#fffaf3,#ead7c3);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:24px;
+  margin-bottom:15px;
+}
+
+.hero h1{
+  margin:8px 0;
+  font-size:28px;
+}
+
+.badge{
+  display:inline-block;
+  background:#ead8c5;
+  color:var(--brown);
+  border-radius:20px;
+  padding:7px 11px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:17px;
+  margin-bottom:14px;
+  box-shadow:0 4px 15px #5d402c0d;
+}
+
+.card h2,
+.card h3{
+  margin-top:0;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.info{
+  background:#f5eadf;
+  border-radius:13px;
+  padding:12px;
+}
+
+.info small{
+  display:block;
+  color:#7d6b5e;
+  margin-bottom:5px;
+}
+
+.dialogue{
+  padding:15px;
+  border-radius:0 14px 14px 0;
+  border-left:4px solid var(--brown2);
+  background:#f8eee4;
+  margin:12px 0;
+  line-height:1.6;
+}
+
+.dialogue strong{
+  display:block;
+  color:var(--brown);
+  margin-bottom:5px;
+}
+
+.opponent{
+  background:#f7e5e1;
+  border:1px solid #e2c1bb;
+  border-radius:16px;
+  padding:16px;
+  margin:14px 0;
+  line-height:1.6;
+}
+
+.opponent strong{
+  color:#954e46;
+}
+
+.judge{
+  background:#eee8df;
+  border:1px solid #d6cdc1;
+  border-radius:16px;
+  padding:16px;
+  margin:14px 0;
+  line-height:1.6;
+}
+
+.judge strong{
+  color:#61554d;
+}
+
+.investigation{
+  background:#edf1f4;
+  border:1px solid #ced8e1;
+  border-radius:16px;
+  padding:16px;
+  margin-top:15px;
+}
+
+.investigation strong{
+  color:#526b86;
+}
+
+button{
+  width:100%;
+  border:0;
+  border-radius:13px;
+  padding:14px 15px;
+  background:var(--brown);
+  color:white;
+  font-weight:bold;
+  font-size:14px;
+  cursor:pointer;
+  margin-top:8px;
+  transition:.15s;
+}
+
+button:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.choice{
+  background:#fffdf9;
+  color:var(--dark);
+  border:1px solid var(--line);
+  text-align:left;
+  font-weight:normal;
+}
+
+.choice:hover{
+  background:#f8eee4;
+}
+
+.choice.selected{
+  border:2px solid var(--brown);
+  background:#eee0d1;
+}
+
+.green{background:var(--green)}
+.red{background:var(--red)}
+.gold{background:var(--gold)}
+.blue{background:var(--blue)}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:14px;
+}
+
+.stat{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:13px;
+  padding:10px 7px;
+  text-align:center;
+}
+
+.stat small{
+  font-size:10px;
+  color:#78695e;
+}
+
+.stat strong{
+  display:block;
+  font-size:20px;
+  margin-top:4px;
+}
+
+.bar{
+  height:6px;
+  background:#e3d5c7;
+  border-radius:20px;
+  overflow:hidden;
+  margin-top:7px;
+}
+
+.bar span{
+  display:block;
+  height:100%;
+  width:0;
+  transition:.4s;
+}
+
+.legal{background:#66866d}
+.logic{background:#756b96}
+.speech{background:#b38a4d}
+.invest{background:#687f9d}
+
+.turn{
+  display:inline-block;
+  background:var(--brown);
+  color:white;
+  border-radius:15px;
+  padding:6px 10px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.alert{
+  padding:14px;
+  border-radius:14px;
+  margin:12px 0;
+  line-height:1.55;
+}
+
+.alert.red{
+  background:#f5e3df;
+  color:#743f39;
+}
+
+.alert.green{
+  background:#e6eee7;
+  color:#49634e;
+}
+
+.alert.gold{
+  background:#f5ead7;
+  color:#70572c;
+}
+
+.alert.blue{
+  background:#e5ebf2;
+  color:#4c6179;
+}
+
+.score{
+  text-align:center;
+  font-size:58px;
+  font-weight:900;
+  color:var(--brown);
+}
+
+.verdict{
+  text-align:center;
+  font-size:21px;
+  font-weight:900;
+  margin:8px 0 20px;
+}
+
+textarea{
+  width:100%;
+  min-height:150px;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  font:inherit;
+  background:#fffdf9;
+}
+
+.small{
+  font-size:13px;
+  color:#78695e;
+  line-height:1.6;
+}
+
+@media(max-width:600px){
+  main{padding:12px}
+  .hero h1{font-size:24px}
+  .grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="top">
+    <div class="logo">⚖️ APX LAWYER</div>
+    <div class="case">VỤ ÁN 011</div>
+  </div>
+
+  <div class="progress">
+    <span id="progress"></span>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= INTRO ================= -->
+
+<section class="screen active" id="intro">
+
+  <div class="hero">
+    <span class="badge">THƯƠNG MẠI • THUẾ • HÌNH SỰ</span>
+
+    <h1>Sổ sách hai hệ thống</h1>
+
+    <p>
+      Giám đốc một doanh nghiệp bị cáo buộc chỉ đạo che giấu doanh thu
+      để giảm số thuế phải nộp.
+    </p>
+  </div>
+
+  <div class="card">
+
+    <h3>⚖️ Vai trò</h3>
+
+    <p>
+      Bạn là luật sư bào chữa cho <b>Nguyễn Hoàng Nam</b>,
+      Giám đốc Công ty Hải Nam.
+    </p>
+
+    <p>
+      Phía buộc tội cho rằng Nam biết công ty có doanh thu thực tế cao hơn
+      số đã kê khai nhưng vẫn chỉ đạo bộ phận kế toán sử dụng số liệu thấp hơn.
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📌 Thông tin vụ án</h3>
+
+    <div class="grid">
+
+      <div class="info">
+        <small>Doanh nghiệp</small>
+        <b>Công ty Hải Nam</b>
+      </div>
+
+      <div class="info">
+        <small>Người bị truy tố</small>
+        <b>Nguyễn Hoàng Nam</b>
+      </div>
+
+      <div class="info">
+        <small>Khoản doanh thu bị tranh chấp</small>
+        <b>Khoảng 8,4 tỷ đồng</b>
+      </div>
+
+      <div class="info">
+        <small>Vấn đề chính</small>
+        <b>Ý chí và trách nhiệm của giám đốc</b>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🎯 Mục tiêu</h3>
+
+    <ul>
+      <li>Điều tra thông tin trong lúc tranh tụng.</li>
+      <li>Phân biệt sai sót kế toán với hành vi cố ý.</li>
+      <li>Phản bác cách tính và lập luận của bên kia.</li>
+      <li>Xử lý các tình huống bất ngờ từ Hội đồng xét xử.</li>
+    </ul>
+
+  </div>
+
+  <button onclick="go('meeting')">
+    Gặp thân chủ →
+  </button>
+
+</section>
+
+
+<!-- ================= MEETING ================= -->
+
+<section class="screen" id="meeting">
+
+  <div class="hero">
+    <span class="badge">GIAI ĐOẠN 1</span>
+    <h1>Gặp thân chủ</h1>
+    <p>Đừng vội chọn hướng bào chữa. Hãy hỏi đúng câu hỏi.</p>
+  </div>
+
+  <div class="card">
+
+    <div class="dialogue">
+
+      <strong>Nguyễn Hoàng Nam</strong>
+
+      “Tôi thừa nhận công ty có sai sót về sổ sách.
+      Nhưng tôi không hề nói kế toán phải giấu doanh thu.”
+
+    </div>
+
+    <div class="dialogue">
+
+      <strong>Nam</strong>
+
+      “Công ty có kế toán trưởng và bộ phận kế toán riêng.
+      Tôi ký nhiều giấy tờ nhưng không trực tiếp nhập từng hóa đơn.”
+
+    </div>
+
+    <div class="dialogue">
+
+      <strong>Nam</strong>
+
+      “Có một bảng doanh thu nội bộ cao hơn báo cáo thuế.
+      Nhưng bảng đó chỉ là bảng dự kiến dòng tiền.”
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>Bạn muốn hỏi điều gì trước?</h3>
+
+    <div id="meetingChoices">
+
+      <button class="choice"
+        onclick="meetingChoice('accounting',this)">
+        <b>A.</b> Ai lập bảng doanh thu và ai có quyền sửa số liệu?
+      </button>
+
+      <button class="choice"
+        onclick="meetingChoice('instruction',this)">
+        <b>B.</b> Nam đã từng trực tiếp yêu cầu kế toán giảm doanh thu chưa?
+      </button>
+
+      <button class="choice"
+        onclick="meetingChoice('process',this)">
+        <b>C.</b> Quy trình từ bán hàng → xuất hóa đơn → kê khai thuế của công ty?
+      </button>
+
+    </div>
+
+    <div id="meetingResult"></div>
+
+    <button
+      id="meetingNext"
+      disabled
+      onclick="go('investigation')">
+      Bắt đầu chuẩn bị tranh tụng →
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= INVESTIGATION ================= -->
+
+<section class="screen" id="investigation">
+
+  <div class="hero">
+
+    <span class="badge">ĐIỀU TRA TRONG VỤ ÁN</span>
+
+    <h1>Kiểm tra hồ sơ</h1>
+
+    <p>
+      Bạn chỉ có thời gian kiểm tra một số vấn đề trước khi phiên tranh luận
+      bắt đầu. Thông tin tìm được sẽ được dùng trực tiếp trong các lượt đối đáp.
+    </p>
+
+  </div>
+
+  <div class="stats">
+
+    <div class="stat">
+      <small>PHÁP LÝ</small>
+      <strong id="iLegal">50</strong>
+    </div>
+
+    <div class="stat">
+      <small>LOGIC</small>
+      <strong id="iLogic">50</strong>
+    </div>
+
+    <div class="stat">
+      <small>ĐỐI ĐÁP</small>
+      <strong id="iSpeech">50</strong>
+    </div>
+
+    <div class="stat">
+      <small>ĐIỀU TRA</small>
+      <strong id="iInvest">50</strong>
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>🔎 Bạn muốn kiểm tra gì?</h3>
+
+    <button class="choice"
+      onclick="investigate('procedure',this)">
+      📑 Quy trình kế toán và phê duyệt báo cáo
+    </button>
+
+    <button class="choice"
+      onclick="investigate('internal',this)">
+      💻 Bảng doanh thu nội bộ
+    </button>
+
+    <button class="choice"
+      onclick="investigate('instruction',this)">
+      💬 Trao đổi giữa giám đốc và kế toán
+    </button>
+
+    <button class="choice"
+      onclick="investigate('tax',this)">
+      🧮 Cách tính khoản thuế bị cho là thiếu
+    </button>
+
+    <div id="investResult"></div>
+
+    <button
+      id="investNext"
+      disabled
+      onclick="startTrial()">
+      Bước vào phiên tranh tụng →
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= TRIAL ================= -->
+
+<section class="screen" id="trial">
+
+  <div class="hero">
+
+    <span class="badge">PHIÊN TRANH TỤNG</span>
+
+    <h1>Đối đáp trực tiếp</h1>
+
+    <p>
+      Mỗi lượt bạn có thể phản biện, yêu cầu làm rõ hoặc sử dụng thông tin
+      đã điều tra.
+    </p>
+
+  </div>
+
+  <div class="stats">
+
+    <div class="stat">
+      <small>PHÁP LÝ</small>
+      <strong id="legal">50</strong>
+      <div class="bar">
+        <span id="legalBar" class="legal"></span>
+      </div>
+    </div>
+
+    <div class="stat">
+      <small>LOGIC</small>
+      <strong id="logic">50</strong>
+      <div class="bar">
+        <span id="logicBar" class="logic"></span>
+      </div>
+    </div>
+
+    <div class="stat">
+      <small>ĐỐI ĐÁP</small>
+      <strong id="speech">50</strong>
+      <div class="bar">
+        <span id="speechBar" class="speech"></span>
+      </div>
+    </div>
+
+    <div class="stat">
+      <small>ĐIỀU TRA</small>
+      <strong id="invest">50</strong>
+      <div class="bar">
+        <span id="investBar" class="invest"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <span class="turn" id="turnLabel">
+      LƯỢT 1 / 7
+    </span>
+
+    <div class="opponent">
+
+      <strong>⚖️ Luật sư bên buộc tội</strong>
+
+      <p id="opponentText"></p>
+
+    </div>
+
+    <div id="specialEvent"></div>
+
+    <h3>Bạn đối đáp thế nào?</h3>
+
+    <div id="trialChoices"></div>
+
+    <div id="trialResult"></div>
+
+    <button
+      id="nextTurn"
+      class="green"
+      style="display:none"
+      onclick="nextTrialTurn()">
+      Tiếp tục phiên tòa →
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= FINAL ================= -->
+
+<section class="screen" id="final">
+
+  <div class="hero">
+
+    <span class="badge">LỜI BÀO CHỮA CUỐI CÙNG</span>
+
+    <h1>Chốt quan điểm</h1>
+
+    <p>
+      Hội đồng xét xử yêu cầu bạn trình bày ngắn gọn:
+      vì sao chưa thể đồng nhất sai phạm về số liệu với việc
+      Nguyễn Hoàng Nam cố ý thực hiện hành vi phạm tội.
+    </p>
+
+  </div>
+
+  <div class="card">
+
+    <div class="judge">
+
+      <strong>⚖️ Chủ tọa</strong>
+
+      <p>
+        “Luật sư cần đi thẳng vào vấn đề.
+        Hội đồng xét xử không cần nghe lại toàn bộ diễn biến.”
+      </p>
+
+    </div>
+
+    <h3>Chọn hướng kết luận</h3>
+
+    <button class="choice"
+      onclick="finalChoice('intent',this)">
+      <b>A.</b> Chưa đủ cơ sở chứng minh ý chí cố ý của bị cáo.
+    </button>
+
+    <button class="choice"
+      onclick="finalChoice('role',this)">
+      <b>B.</b> Cần phân biệt trách nhiệm của giám đốc với trách nhiệm chuyên môn của bộ phận kế toán.
+    </button>
+
+    <button class="choice"
+      onclick="finalChoice('calculation',this)">
+      <b>C.</b> Số tiền bị cho là trốn thuế cần được xác định lại bằng phương pháp tính rõ ràng.
+    </button>
+
+    <button class="choice"
+      onclick="finalChoice('combined',this)">
+      <b>D.</b> Kết hợp cả ba vấn đề: ý chí + vai trò + số liệu.
+    </button>
+
+  </div>
+
+  <div class="card">
+
+    <h3>✍️ Bài bào chữa</h3>
+
+    <textarea id="finalSpeech"
+      placeholder="Kính thưa Hội đồng xét xử,..."></textarea>
+
+    <button onclick="finish()">
+      Trình bày lời bào chữa
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= END ================= -->
+
+<section class="screen" id="ending">
+
+  <div class="hero">
+
+    <span class="badge">KẾT QUẢ VỤ ÁN 011</span>
+
+    <div class="score" id="score">0</div>
+
+    <div class="verdict" id="verdict"></div>
+
+    <p id="result"></p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📊 Năng lực tranh tụng</h3>
+
+    <div class="stats">
+
+      <div class="stat">
+        <small>PHÁP LÝ</small>
+        <strong id="endLegal">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>LOGIC</small>
+        <strong id="endLogic">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>ĐỐI ĐÁP</small>
+        <strong id="endSpeech">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>ĐIỀU TRA</small>
+        <strong id="endInvest">0</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>💡 Nhận xét</h3>
+
+    <p id="feedback"></p>
+
+  </div>
+
+  <button onclick="location.reload()">
+    Chơi lại vụ án
+  </button>
+
+</section>
+
+</main>
+</div>
+
+
+<script>
+
+/* ================= STATE ================= */
+
+const state={
+
+  screen:"intro",
+
+  strategy:null,
+
+  meeting:null,
+
+  investigation:[],
+
+  trial:0,
+
+  final:null,
+
+  legal:50,
+
+  logic:50,
+
+  speech:50,
+
+  invest:50,
+
+  correct:0,
+
+  objections:0,
+
+  eventsHandled:0
+
+};
+
+
+/* ================= NAVIGATION ================= */
+
+function go(id){
+
+  document.querySelectorAll(".screen")
+    .forEach(x=>x.classList.remove("active"));
+
+  document.getElementById(id)
+    .classList.add("active");
+
+  state.screen=id;
+
+  const progress={
+    intro:5,
+    meeting:18,
+    investigation:32,
+    trial:58,
+    final:84,
+    ending:100
+  };
+
+  document.getElementById("progress").style.width=
+    progress[id]+"%";
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+}
+
+
+/* ================= MEETING ================= */
+
+function meetingChoice(type,button){
+
+  document.querySelectorAll("#meetingChoices .choice")
+    .forEach(x=>x.classList.remove("selected"));
+
+  button.classList.add("selected");
+
+  state.meeting=type;
+
+  let html="";
+
+  if(type==="accounting"){
+
+    html=`
+      <div class="alert blue">
+        <b>Thông tin thu được:</b><br>
+        Bảng doanh thu được lập bởi kế toán trưởng.
+        Nhân viên bán hàng nhập dữ liệu giao dịch.
+        Giám đốc có quyền xem nhưng không trực tiếp nhập dữ liệu.
+      </div>
+    `;
+
+  }
+
+  if(type==="instruction"){
+
+    html=`
+      <div class="alert gold">
+        <b>Thông tin thu được:</b><br>
+        Nam từng nhắn “kiểm tra lại số liệu trước khi gửi”.
+        Chưa thấy câu chữ trực tiếp yêu cầu giảm doanh thu.
+      </div>
+    `;
+
+  }
+
+  if(type==="process"){
+
+    html=`
+      <div class="alert green">
+        <b>Thông tin thu được:</b><br>
+        Quy trình gồm nhiều bước: bán hàng → nhập hệ thống →
+        kế toán kiểm tra → lập báo cáo → giám đốc ký.
+      </div>
+    `;
+
+  }
+
+  document.getElementById("meetingResult").innerHTML=html;
+
+  document.getElementById("meetingNext").disabled=false;
+
+}
+
+
+/* ================= INVESTIGATION ================= */
+
+function investigate(type,button){
+
+  if(state.investigation.includes(type)){
+
+    return;
+
+  }
+
+  state.investigation.push(type);
+
+  button.classList.add("selected");
+  button.disabled=true;
+
+  let html="";
+
+  if(type==="procedure"){
+
+    state.invest+=12;
+    state.logic+=5;
+
+    html=`
+      <div class="investigation">
+        <strong>📑 KẾT QUẢ KIỂM TRA</strong>
+        <p>
+          Báo cáo thuế phải qua bộ phận kế toán lập,
+          kế toán trưởng kiểm tra rồi mới trình giám đốc ký.
+          Nam không phải người nhập dữ liệu hóa đơn.
+        </p>
+      </div>
+    `;
+
+  }
+
+  if(type==="internal"){
+
+    state.invest+=14;
+    state.logic+=8;
+
+    html=`
+      <div class="investigation">
+        <strong>💻 KẾT QUẢ KIỂM TRA</strong>
+        <p>
+          Bảng nội bộ ghi doanh thu cao hơn báo cáo thuế.
+          Tuy nhiên tiêu đề bảng ghi “Dự kiến dòng tiền”.
+          Một số khoản chưa có hóa đơn hoàn tất.
+        </p>
+      </div>
+    `;
+
+  }
+
+  if(type==="instruction"){
+
+    state.invest+=15;
+    state.speech+=5;
+
+    html=`
+      <div class="investigation">
+        <strong>💬 THÔNG TIN MỚI</strong>
+        <p>
+          Có tin nhắn giữa Nam và kế toán:
+          “Số liệu tháng này cần kiểm tra lại trước khi chốt.”
+        </p>
+
+        <p>
+          Không có câu nào trực tiếp yêu cầu:
+          “hãy giấu doanh thu”.
+        </p>
+      </div>
+    `;
+
+  }
+
+  if(type==="tax"){
+
+    state.invest+=18;
+    state.legal+=7;
+
+    html=`
+      <div class="investigation">
+        <strong>🧮 KẾT QUẢ TÍNH LẠI</strong>
+        <p>
+          Con số 8,4 tỷ đồng là tổng doanh thu bị đặt vấn đề,
+          không phải mặc nhiên đồng nghĩa với số thuế bị thất thu.
+        </p>
+
+        <p>
+          Muốn xác định số tiền liên quan cần tiếp tục phân loại
+          doanh thu, chi phí và các khoản đã kê khai.
+        </p>
+      </div>
+    `;
+
+  }
+
+  document.getElementById("investResult").innerHTML+=html;
+
+  updateInvestStats();
+
+  if(state.investigation.length>=2){
+
+    document.getElementById("investNext").disabled=false;
+
+  }
+
+}
+
+
+function updateInvestStats(){
+
+  document.getElementById("iLegal").textContent=
+    Math.min(100,state.legal);
+
+  document.getElementById("iLogic").textContent=
+    Math.min(100,state.logic);
+
+  document.getElementById("iSpeech").textContent=
+    Math.min(100,state.speech);
+
+  document.getElementById("iInvest").textContent=
+    Math.min(100,state.invest);
+
+}
+
+
+/* ================= TRIAL ================= */
+
+const turns=[
+
+{
+
+text:
+"Giám đốc là người đứng đầu doanh nghiệp. Ông Nam ký báo cáo thuế, vì vậy không thể nói ông ấy không biết số liệu thực tế.",
+
+choices:[
+
+{
+text:
+"Việc ký báo cáo không tự động chứng minh người ký trực tiếp lập hoặc biết mọi dữ liệu đầu vào. Cần làm rõ quy trình lập báo cáo và phạm vi công việc của từng bộ phận.",
+
+legal:8,logic:10,speech:7,invest:6,good:true,
+
+reply:
+"Luật sư đang yêu cầu phân biệt giữa quyền ký và quá trình hình thành số liệu. Tôi ghi nhận."
+
+},
+
+{
+text:
+"Giám đốc không biết gì về kế toán.",
+
+legal:-6,logic:-7,speech:-3,invest:-3,
+
+reply:
+"Giám đốc không thể phủ nhận hoàn toàn trách nhiệm quản lý doanh nghiệp."
+
+},
+
+{
+text:
+"Chúng tôi không chấp nhận cáo buộc.",
+
+legal:0,logic:-4,speech:-2,invest:0,
+
+reply:
+"Đó chỉ là sự phủ nhận, chưa phải lập luận."
+}
+
+]
+
+},
+
+{
+
+text:
+"Trong bảng nội bộ có doanh thu 8,4 tỷ đồng nhưng báo cáo thuế lại thấp hơn. Rõ ràng doanh nghiệp có hai hệ thống sổ sách.",
+
+choices:[
+
+{
+text:
+"Chính vì có hai con số nên cần xác định bản chất từng bảng. Bảng nội bộ được ghi là dự kiến dòng tiền và còn chứa khoản chưa hoàn tất hóa đơn.",
+
+legal:8,logic:10,speech:8,invest:12,good:true,
+
+reply:
+"Được. Nhưng luật sư phải chứng minh bảng đó thực sự không phải sổ doanh thu dùng để kê khai."
+
+},
+
+{
+text:
+"Hai bảng khác nhau là chuyện bình thường.",
+
+legal:-2,logic:-5,speech:2,invest:0,
+
+reply:
+"Khác nhau đến mức nào và vì sao khác nhau vẫn phải được giải thích."
+
+},
+
+{
+text:
+"Bảng đó chắc chắn là giả.",
+
+legal:-5,logic:-8,speech:-3,invest:-5,
+
+reply:
+"Luật sư chưa đưa ra căn cứ để gọi tài liệu là giả."
+}
+
+]
+
+},
+
+{
+
+text:
+"Thân chủ của anh từng nhắn kế toán phải 'kiểm tra lại số liệu trước khi chốt'. Điều này cho thấy ông ấy biết vấn đề.",
+
+choices:[
+
+{
+text:
+"Biết rằng số liệu cần kiểm tra không đồng nghĩa với biết rằng có hành vi che giấu doanh thu. Chính nội dung đầy đủ của trao đổi mới là điều cần đánh giá.",
+
+legal:9,logic:10,speech:9,invest:10,good:true,
+
+reply:
+"Đúng là câu nói này chưa trực tiếp thể hiện yêu cầu che giấu doanh thu."
+
+},
+
+{
+text:
+"Tin nhắn đó không có giá trị gì.",
+
+legal:-4,logic:-5,speech:-2,invest:-2,
+
+reply:
+"Luật sư không thể tùy tiện loại bỏ một tài liệu bất lợi."
+
+},
+
+{
+text:
+"Nam nói vậy vì kế toán làm sai.",
+
+legal:1,logic:2,speech:3,invest:2,
+
+reply:
+"Đây là cách giải thích có thể xem xét nhưng vẫn cần căn cứ."
+}
+
+]
+
+},
+
+{
+
+text:
+"Khoản doanh thu bị cho là che giấu lên tới 8,4 tỷ đồng. Con số này quá lớn để có thể gọi là sai sót nhỏ.",
+
+event:"calculation",
+
+choices:[
+
+{
+text:
+"Quy mô doanh thu không tự quyết định số thuế bị thất thu hay ý chí của bị cáo. Trước hết phải xác định phương pháp tính và bản chất từng khoản.",
+
+legal:10,logic:10,speech:8,invest:12,good:true,
+
+reply:
+"Luật sư đã đặt đúng câu hỏi về cách hình thành con số."
+
+},
+
+{
+text:
+"8,4 tỷ không lớn đối với doanh nghiệp.",
+
+legal:-5,logic:-7,speech:-4,invest:-4,
+
+reply:
+"Đây là lập luận thiếu cơ sở."
+
+},
+
+{
+text:
+"Tôi không muốn tranh luận về con số.",
+
+legal:-4,logic:-5,speech:-5,invest:-3,
+
+reply:
+"Con số là một phần quan trọng của vụ án. Không thể bỏ qua."
+}
+
+]
+
+},
+
+{
+
+text:
+"Phía buộc tội cho rằng ông Nam phải chịu trách nhiệm vì ông là người hưởng lợi từ hoạt động của công ty.",
+
+event:"judge",
+
+choices:[
+
+{
+text:
+"Quyền hưởng lợi từ hoạt động doanh nghiệp không tự động chứng minh người quản lý đã cố ý thực hiện một hành vi cụ thể. Cần chứng minh mối liên hệ giữa bị cáo và hành vi bị cáo buộc.",
+
+legal:10,logic:10,speech:9,invest:7,good:true,
+
+reply:
+"Luận điểm đã đi đúng trọng tâm."
+
+},
+
+{
+text:
+"Ông ấy không hưởng lợi gì cả.",
+
+legal:-3,logic:-5,speech:-2,invest:-3,
+
+reply:
+"Điều này cần được chứng minh chứ không thể chỉ khẳng định."
+},
+
+{
+text:
+"Doanh nghiệp là của ông ấy nên ông ấy không chịu trách nhiệm.",
+
+legal:-8,logic:-8,speech:-5,invest:-4,
+
+reply:
+"Quyền sở hữu và trách nhiệm đối với từng hành vi pháp lý không thể giản đơn hóa như vậy."
+}
+
+]
+
+},
+
+{
+
+text:
+"Luật sư đang liên tục nói rằng kế toán có thể chịu trách nhiệm. Nhưng bị cáo là người quản lý cuối cùng.",
+
+choices:[
+
+{
+text:
+"Chúng tôi không chuyển trách nhiệm một cách máy móc. Chúng tôi yêu cầu xác định ai thực hiện thao tác nào, ai biết thông tin nào và ai có hành vi chỉ đạo cụ thể nào.",
+
+legal:10,logic:10,speech:10,invest:9,good:true,
+
+reply:
+"Đây là sự phân biệt hợp lý giữa trách nhiệm quản lý và hành vi cụ thể."
+
+},
+
+{
+text:
+"Kế toán làm thì kế toán chịu.",
+
+legal:-7,logic:-8,speech:-5,invest:-4,
+
+reply:
+"Luật sư đang đơn giản hóa vấn đề."
+},
+
+{
+text:
+"Nam không liên quan đến công ty.",
+
+legal:-9,logic:-10,speech:-7,invest:-7,
+
+reply:
+"Điều này trái với chính hồ sơ vụ án."
+}
+
+]
+
+},
+
+{
+
+text:
+"Phía buộc tội cho rằng tất cả các yếu tố trên cộng lại đủ để chứng minh hành vi cố ý.",
+
+event:"finalObjection",
+
+choices:[
+
+{
+text:
+"Những yếu tố được nêu mới tạo thành nghi vấn. Để đi đến kết luận bất lợi cho bị cáo, từng mắt xích phải được chứng minh chứ không thể cộng các giả định lại thành một kết luận.",
+
+legal:10,logic:12,speech:10,invest:10,good:true,
+
+reply:
+"Đây là cách phản biện tổng hợp khá chặt chẽ."
+
+},
+
+{
+text:
+"Tôi phản đối toàn bộ.",
+
+legal:1,logic:-2,speech:3,invest:0,
+
+reply:
+"Phản đối nhưng chưa chỉ ra điểm sai cụ thể."
+},
+
+{
+text:
+"Không có bằng chứng nào cả.",
+
+legal:-4,logic:-6,speech:-3,invest:-5,
+
+reply:
+"Đối phương đã đưa ra nhiều tài liệu. Nói 'không có bằng chứng' là quá tuyệt đối."
+}
+
+]
+
+}
+
+];
+
+
+function startTrial(){
+
+  state.trial=0;
+
+  go("trial");
+
+  loadTrial();
+
+  updateTrialStats();
+
+}
+
+
+function loadTrial(){
+
+  const t=turns[state.trial];
+
+  document.getElementById("turnLabel").textContent=
+    `LƯỢT ${state.trial+1} / ${turns.length}`;
+
+  document.getElementById("opponentText").textContent=t.text;
+
+  document.getElementById("specialEvent").innerHTML="";
+
+  if(t.event==="calculation"){
+
+    document.getElementById("specialEvent").innerHTML=`
+      <div class="alert gold">
+        🧮 <b>TÌNH HUỐNG BẤT NGỜ:</b>
+        Chủ tọa yêu cầu hai bên giải thích chính xác
+        con số 8,4 tỷ được hình thành như thế nào.
+      </div>
+    `;
+
+    state.eventsHandled++;
+
+  }
+
+  if(t.event==="judge"){
+
+    document.getElementById("specialEvent").innerHTML=`
+      <div class="judge">
+        <strong>⚖️ CHỦ TỌA CAN THIỆP</strong>
+        <p>
+          “Hội đồng xét xử không chấp nhận việc chỉ dựa vào
+          chức vụ giám đốc để suy ra toàn bộ trách nhiệm.
+          Luật sư hãy đi vào hành vi cụ thể.”
+        </p>
+      </div>
+    `;
+
+    state.objections++;
+
+  }
+
+  if(t.event==="finalObjection"){
+
+    document.getElementById("specialEvent").innerHTML=`
+      <div class="judge">
+        <strong>⚖️ TÒA YÊU CẦU LÀM RÕ</strong>
+        <p>
+          “Luật sư cần phân biệt giữa nghi vấn,
+          sai phạm hành chính và căn cứ để xác định trách nhiệm hình sự.”
+        </p>
+      </div>
+    `;
+
+    state.objections++;
+
+  }
+
+  const box=document.getElementById("trialChoices");
+
+  box.innerHTML="";
+
+  t.choices.forEach((c,i)=>{
+
+    const btn=document.createElement("button");
+
+    btn.className="choice";
+
+    btn.innerHTML=
+      `<b>PHƯƠNG ÁN ${String.fromCharCode(65+i)}</b><br>${c.text}`;
+
+    btn.onclick=()=>selectTrial(c,btn);
+
+    box.appendChild(btn);
+
+  });
+
+  document.getElementById("trialResult").innerHTML="";
+
+  document.getElementById("nextTurn").style.display="none";
+
+}
+
+
+function selectTrial(c,button){
+
+  document.querySelectorAll("#trialChoices button")
+    .forEach(x=>x.disabled=true);
+
+  button.classList.add("selected");
+
+  state.legal+=c.legal;
+  state.logic+=c.logic;
+  state.speech+=c.speech;
+  state.invest+=c.invest;
+
+  if(c.good) state.correct++;
+
+  updateTrialStats();
+
+  document.getElementById("trialResult").innerHTML=`
+    <div class="alert ${c.good?"green":"red"}">
+      <b>⚖️ Phản hồi của phía bên kia:</b>
+      <p>${c.reply}</p>
+    </div>
+  `;
+
+  document.getElementById("nextTurn").style.display="block";
+
+}
+
+
+function nextTrialTurn(){
+
+  state.trial++;
+
+  if(state.trial>=turns.length){
+
+    go("final");
+
+    return;
+
+  }
+
+  loadTrial();
+
+}
+
+
+function updateTrialStats(){
+
+  const values={
+
+    legal:Math.max(0,Math.min(100,state.legal)),
+
+    logic:Math.max(0,Math.min(100,state.logic)),
+
+    speech:Math.max(0,Math.min(100,state.speech)),
+
+    invest:Math.max(0,Math.min(100,state.invest))
+
+  };
+
+  state.legal=values.legal;
+  state.logic=values.logic;
+  state.speech=values.speech;
+  state.invest=values.invest;
+
+  document.getElementById("legal").textContent=values.legal;
+  document.getElementById("logic").textContent=values.logic;
+  document.getElementById("speech").textContent=values.speech;
+  document.getElementById("invest").textContent=values.invest;
+
+  document.getElementById("legalBar").style.width=
+    values.legal+"%";
+
+  document.getElementById("logicBar").style.width=
+    values.logic+"%";
+
+  document.getElementById("speechBar").style.width=
+    values.speech+"%";
+
+  document.getElementById("investBar").style.width=
+    values.invest+"%";
+
+}
+
+
+/* ================= FINAL ================= */
+
+function finalChoice(type,button){
+
+  state.final=type;
+
+  document.querySelectorAll("#final .choice")
+    .forEach(x=>x.classList.remove("selected"));
+
+  button.classList.add("selected");
+
+}
+
+
+function finish(){
+
+  if(!state.final){
+
+    alert("Hãy chọn hướng kết luận.");
+
+    return;
+
+  }
+
+  const text=
+    document.getElementById("finalSpeech")
+    .value.trim();
+
+  let score=
+    (state.legal+
+     state.logic+
+     state.speech+
+     state.invest)/4;
+
+  score+=state.correct*2;
+
+  score+=state.eventsHandled*2;
+
+  score+=state.objections*2;
+
+  if(state.final==="intent") score+=6;
+
+  if(state.final==="role") score+=5;
+
+  if(state.final==="calculation") score+=5;
+
+  if(state.final==="combined") score+=10;
+
+  if(text.length>=120) score+=6;
+
+  score=Math.round(
+    Math.max(0,Math.min(100,score))
+  );
+
+  document.getElementById("score").textContent=score;
+
+  document.getElementById("endLegal").textContent=
+    state.legal;
+
+  document.getElementById("endLogic").textContent=
+    state.logic;
+
+  document.getElementById("endSpeech").textContent=
+    state.speech;
+
+  document.getElementById("endInvest").textContent=
+    state.invest;
+
+
+  let verdict;
+  let result;
+  let feedback;
+
+
+  if(score>=88){
+
+    verdict="🏆 BÀO CHỮA RẤT THUYẾT PHỤC";
+
+    result=
+      "Bạn vừa điều tra vừa tranh tụng tốt, đặc biệt là khả năng sử dụng thông tin mới để phá thế lập luận của đối phương.";
+
+    feedback=
+      "Bạn không né tránh các điểm bất lợi. Thay vào đó, bạn buộc phía bên kia phải chứng minh từng mắt xích: số liệu → hành vi → sự biết → ý chí.";
+
+  }
+
+  else if(score>=72){
+
+    verdict="🥇 PHIÊN BÀO CHỮA TỐT";
+
+    result=
+      "Bạn giữ được thế trận và xử lý khá tốt các tình huống Tòa can thiệp.";
+
+    feedback=
+      "Điểm mạnh là khả năng kết hợp điều tra với phản biện. Tuy nhiên một số lập luận vẫn có thể cụ thể hơn.";
+
+  }
+
+  else if(score>=55){
+
+    verdict="⚖️ BÀO CHỮA Ở MỨC KHÁ";
+
+    result=
+      "Bạn đã bảo vệ được một phần quan điểm nhưng đôi lúc để phía bên kia dẫn dắt.";
+
+    feedback=
+      "Đừng chỉ nói 'không đủ căn cứ'. Hãy chỉ rõ căn cứ nào thiếu, mắt xích nào chưa được chứng minh và cần kiểm tra lại con số nào.";
+
+  }
+
+  else{
+
+    verdict="📚 CẦN LUYỆN THÊM";
+
+    result=
+      "Phía bên kia kiểm soát phần lớn thế trận tranh luận.";
+
+    feedback=
+      "Bạn cần học cách biến thông tin điều tra thành luận điểm cụ thể thay vì chỉ đưa ra lời phủ nhận.";
+
+  }
+
+
+  document.getElementById("verdict").textContent=
+    verdict;
+
+  document.getElementById("result").textContent=
+    result;
+
+  document.getElementById("feedback").textContent=
+    feedback;
+
+  go("ending");
+
+}
+
+</script>
+
+</body>
+</html>
