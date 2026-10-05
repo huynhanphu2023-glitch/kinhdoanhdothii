@@ -254,6 +254,7 @@ window.APXPages = window.APXPages || {};
       startedDay: Math.max(1, Number(gameDay) || 1),
       currentQuestion: 0,
       answers: {},
+      pendingAnswers: {},
       finalArgumentId: null,
       selectedFinalDefenseIds: [],
       phase: Array.isArray(caseData.investigationActions) && caseData.investigationActions.length
@@ -285,6 +286,9 @@ window.APXPages = window.APXPages || {};
     var oldMechanicsVersion = Number(progress.mechanicsVersion) || 1;
     if (oldMechanicsVersion >= Number(caseData.mechanicsVersion)) return;
     if (!progress.answers || typeof progress.answers !== "object" || Array.isArray(progress.answers)) progress.answers = {};
+    if (!progress.pendingAnswers || typeof progress.pendingAnswers !== "object" || Array.isArray(progress.pendingAnswers)) {
+      progress.pendingAnswers = {};
+    }
     var currentQuestionIds = Object.create(null);
     caseData.questions.forEach(function (question) { currentQuestionIds[question.id] = true; });
     Object.keys(progress.answers).forEach(function (questionId) {
@@ -391,7 +395,34 @@ window.APXPages = window.APXPages || {};
       return window.APXGame.toast("Hãy kiểm tra căn cứ trước: " + missing.join(", ") + ".", "warning");
     }
 
-    progress.answers[questionId] = choice.id;
+    if (caseData.confirmAnswers) {
+      progress.pendingAnswers[questionId] = choice.id;
+      return persistAndRender("Đã chọn đáp án. Bạn có thể đổi lựa chọn trước khi xác nhận.");
+    }
+    return recordAnswer(caseData, progress, question, choice);
+  }
+
+  function confirmAnswer(caseData, questionId) {
+    var state = gameState(), lawyer = state && lawyerState(state);
+    var progress = lawyer && lawyer.cases[caseData.id];
+    if (!progress || progress.status !== "active" || !caseData.confirmAnswers) return;
+    migrateProgress(caseData, progress);
+    var question = caseData.questions[progress.currentQuestion];
+    if (!question || question.id !== questionId || progress.answers[questionId]) return;
+    return recordAnswer(caseData, progress, question, progress.pendingAnswers[questionId]);
+  }
+
+  function recordAnswer(caseData, progress, question, choiceId) {
+    if (!question || progress.answers[question.id]) return;
+    var choice = question.choices.find(function (item) { return item.id === choiceId; });
+    if (!choice) return window.APXGame.toast("Hãy chọn một đáp án trước khi tiếp tục.", "warning");
+    var missing = missingResearch(caseData, progress, choice);
+    if (missing.length) {
+      return window.APXGame.toast("Hãy kiểm tra căn cứ trước: " + missing.join(", ") + ".", "warning");
+    }
+
+    progress.answers[question.id] = choice.id;
+    delete progress.pendingAnswers[question.id];
     Object.keys(choice.effects || {}).forEach(function (key) {
       if (STAT_KEYS.indexOf(key) < 0) return;
       var next = (Number(progress.stats[key]) || 0) + Number(choice.effects[key]);
@@ -901,14 +932,19 @@ window.APXPages = window.APXPages || {};
   function renderQuestion(caseData, progress) {
     var question = caseData.questions[progress.currentQuestion];
     if (!question) return '<p class="lawyer-case-error">Không tìm thấy tình huống tiếp theo trong hồ sơ.</p>';
-    var selected = progress.answers[question.id];
+    var selected = caseData.confirmAnswers
+      ? progress.pendingAnswers[question.id] || progress.answers[question.id]
+      : progress.answers[question.id];
+    var answered = Boolean(progress.answers[question.id]);
     var choices = question.choices.map(function (choice, index) {
       var letter = String.fromCharCode(65 + index);
       var missing = missingResearch(caseData, progress, choice);
-      return '<div class="lawyer-case-choice-option"><button class="lawyer-case-choice' + (selected === choice.id ? ' is-selected' : '') + '" type="button" data-law-case-action="choose" data-law-case-choice data-case-id="' + escapeHTML(caseData.id) + '" data-question-id="' + escapeHTML(question.id) + '" data-choice-id="' + escapeHTML(choice.id) + '"' + (selected || missing.length ? " disabled" : "") + '><span>' + letter + '</span><strong>' + escapeHTML(choice.text) + '</strong></button><small class="lawyer-case-research-hint" data-law-case-research="' + escapeHTML(choice.id) + '">' + (missing.length ? "Cần đọc: " + escapeHTML(missing.join(" · ")) : "") + '</small></div>';
+      return '<div class="lawyer-case-choice-option"><button class="lawyer-case-choice' + (selected === choice.id ? ' is-selected' : '') + '" type="button" data-law-case-action="choose" data-law-case-choice data-case-id="' + escapeHTML(caseData.id) + '" data-question-id="' + escapeHTML(question.id) + '" data-choice-id="' + escapeHTML(choice.id) + '"' + (answered || missing.length ? " disabled" : "") + '><span>' + letter + '</span><strong>' + escapeHTML(choice.text) + '</strong></button><small class="lawyer-case-research-hint" data-law-case-research="' + escapeHTML(choice.id) + '">' + (missing.length ? "Cần đọc: " + escapeHTML(missing.join(" · ")) : "") + '</small></div>';
     }).join("");
     var last = progress.currentQuestion === caseData.questions.length - 1;
-    var nextAction = last && selected && caseData.finalDefense
+    var nextAction = caseData.confirmAnswers && !answered
+      ? '<p class="lawyer-case-muted">Bạn có thể đổi đáp án trước khi xác nhận.</p><button class="button button-gold" type="button" data-law-case-action="confirm-answer" data-case-id="' + escapeHTML(caseData.id) + '" data-question-id="' + escapeHTML(question.id) + '"' + (!selected ? " disabled" : "") + '>XÁC NHẬN ĐÁP ÁN VÀ TIẾP TỤC →</button>'
+      : last && selected && caseData.finalDefense
       ? renderFinalDefense(caseData, progress)
       : last && selected && progress.mechanicsVersion >= 2 && caseData.finalArguments.length
         ? renderFinalArguments(caseData, progress)
@@ -1407,6 +1443,7 @@ window.APXPages = window.APXPages || {};
       return persistAndRender("Đã quay lại hồ sơ điều tra. Các luận điểm đã chọn vẫn được giữ lại.");
     }
     if (action === "choose") return chooseAnswer(caseData, button.dataset.questionId, button.dataset.choiceId);
+    if (action === "confirm-answer") return confirmAnswer(caseData, button.dataset.questionId);
     if (action === "choose-argument") return chooseFinalArgument(caseData, button.dataset.argumentId);
     if (action === "choose-defense") return chooseFinalDefenseArgument(caseData, button.dataset.argumentId);
     if (action === "case006-meeting" || action === "case006-start-investigation" ||
