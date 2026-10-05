@@ -254,6 +254,13 @@ Quyền biểu quyết phụ thuộc vào tư cách thành viên và tỷ lệ p
       requiresEvidence: ["E303", "E311", "E313"],
       requiresLaw: ["LAW301", "LAW305"],
       effects: { legalAnalysis: 6, evidence: 6, procedure: 8, argument: 5, caseUnderstanding: 8, clientTrust: 7 }
+    },
+    {
+      id: "defer-conclusion",
+      title: "Chưa đủ căn cứ để chốt phương án",
+      rationale: "Ghi nhận rằng hồ sơ hiện chưa đủ tài liệu để khẳng định hiệu lực chuyển nhượng hoặc tính hợp lệ của nghị quyết; đề nghị bổ sung chứng cứ trước khi quyết định yêu cầu cuối cùng.",
+      tradeoff: "Tránh kết luận vượt quá chứng cứ nhưng chưa giải quyết được tư cách thành viên và quyền biểu quyết.",
+      effects: { legalAnalysis: -8, evidence: -8, procedure: -8, argument: -8, caseUnderstanding: -8, clientTrust: -5 }
     }
   ],
 

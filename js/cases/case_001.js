@@ -373,6 +373,13 @@ const CASE_001 = {
             requiresEvidence: ["E01", "E05", "E10"],
             requiresLaw: ["LAW_CONTRACT_02", "LAW_REMEDY_01"],
             effects: { legalAnalysis: 5, evidence: 5, procedure: 9, argument: 6, caseUnderstanding: 7, clientTrust: 6 }
+        },
+        {
+            id: "defer-conclusion",
+            title: "Chưa đủ căn cứ để chốt phương án",
+            rationale: "Ghi nhận rằng hồ sơ hiện chưa đủ tài liệu để lựa chọn yêu cầu cuối cùng; đề nghị bổ sung chứng cứ trước khi tiếp tục tranh chấp.",
+            tradeoff: "Tránh đưa ra kết luận vượt quá chứng cứ nhưng chưa bảo đảm mục tiêu mua nhà hoặc thu hồi tiền của Khang.",
+            effects: { legalAnalysis: -8, evidence: -8, procedure: -8, argument: -8, caseUnderstanding: -8, clientTrust: -5 }
         }
     ],
 

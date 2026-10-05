@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APX Lawyer — Vụ án 010</title>
+
+<style>
+:root{
+  --bg:#f3e9dc;
+  --card:#fffaf3;
+  --brown:#765746;
+  --brown2:#9a765e;
+  --dark:#3f3028;
+  --line:#dfcdbb;
+  --green:#66866d;
+  --red:#a85b52;
+  --gold:#b58a4a;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--dark);
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+.app{
+  max-width:900px;
+  margin:auto;
+  min-height:100vh;
+  padding-bottom:40px;
+}
+
+header{
+  background:var(--brown);
+  color:white;
+  padding:22px 18px;
+  position:sticky;
+  top:0;
+  z-index:20;
+  box-shadow:0 4px 15px #0002;
+}
+
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.logo{
+  font-weight:900;
+  font-size:18px;
+}
+
+.case-number{
+  background:#ffffff22;
+  border:1px solid #ffffff33;
+  padding:7px 11px;
+  border-radius:20px;
+  font-size:12px;
+}
+
+.progress{
+  height:6px;
+  background:#ffffff25;
+  border-radius:20px;
+  margin-top:15px;
+  overflow:hidden;
+}
+
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:#f4d8a4;
+  transition:.4s;
+}
+
+main{
+  padding:18px;
+}
+
+.screen{
+  display:none;
+  animation:fade .25s ease;
+}
+
+.screen.active{
+  display:block;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.hero{
+  background:linear-gradient(135deg,#fffaf3,#ead8c5);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:25px;
+  margin-bottom:16px;
+}
+
+.hero h1{
+  margin:8px 0;
+  font-size:29px;
+}
+
+.badge{
+  display:inline-block;
+  background:#ead8c5;
+  color:var(--brown);
+  border-radius:20px;
+  padding:7px 12px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:14px;
+  box-shadow:0 4px 15px #5b3d2b0d;
+}
+
+.card h2,
+.card h3{
+  margin-top:0;
+}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.info{
+  background:#f5eadf;
+  border-radius:13px;
+  padding:13px;
+}
+
+.info small{
+  display:block;
+  color:#806e61;
+  margin-bottom:5px;
+}
+
+.info strong{
+  font-size:15px;
+}
+
+.dialogue{
+  border-left:4px solid var(--brown2);
+  background:#f8eee4;
+  padding:15px;
+  border-radius:0 14px 14px 0;
+  margin:12px 0;
+}
+
+.dialogue strong{
+  display:block;
+  margin-bottom:6px;
+  color:var(--brown);
+}
+
+.btn-grid{
+  display:grid;
+  gap:10px;
+}
+
+button{
+  border:0;
+  border-radius:13px;
+  padding:14px 16px;
+  background:var(--brown);
+  color:white;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.18s;
+}
+
+button:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+
+button.secondary{
+  background:#ead8c5;
+  color:var(--dark);
+}
+
+button.green{
+  background:var(--green);
+}
+
+button.red{
+  background:var(--red);
+}
+
+button.gold{
+  background:var(--gold);
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.choice{
+  background:#fffdf9;
+  color:var(--dark);
+  border:1px solid var(--line);
+  text-align:left;
+  font-weight:normal;
+}
+
+.choice:hover{
+  border-color:var(--brown2);
+  background:#f8eee4;
+}
+
+.choice.selected{
+  border:2px solid var(--brown);
+  background:#eee0d1;
+}
+
+.choice .tag{
+  display:block;
+  font-size:11px;
+  color:var(--brown2);
+  font-weight:bold;
+  margin-bottom:5px;
+}
+
+.opponent{
+  background:#f6e5e1;
+  border:1px solid #e3c2bc;
+  border-radius:16px;
+  padding:16px;
+  margin:15px 0;
+}
+
+.opponent .name{
+  font-weight:900;
+  color:#934e46;
+  margin-bottom:8px;
+}
+
+.response{
+  background:#e9f0ea;
+  border:1px solid #c9d8cb;
+  border-radius:16px;
+  padding:16px;
+  margin-top:15px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+
+.stat{
+  background:#f5eadf;
+  padding:12px 8px;
+  border-radius:13px;
+  text-align:center;
+}
+
+.stat small{
+  display:block;
+  font-size:10px;
+  color:#806e61;
+}
+
+.stat strong{
+  display:block;
+  font-size:20px;
+  margin-top:4px;
+}
+
+.bar{
+  height:7px;
+  background:#e2d2c2;
+  border-radius:20px;
+  overflow:hidden;
+  margin-top:7px;
+}
+
+.bar span{
+  display:block;
+  height:100%;
+  width:0%;
+  transition:.5s;
+}
+
+.legal{background:#66866d}
+.logic{background:#7c7396}
+.speech{background:#b58a4a}
+.persuade{background:#a85b52}
+
+.round{
+  display:inline-block;
+  background:var(--brown);
+  color:white;
+  padding:6px 10px;
+  border-radius:15px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+.final-box{
+  border:2px solid var(--brown2);
+  border-radius:18px;
+  padding:18px;
+  background:#fffaf3;
+}
+
+textarea{
+  width:100%;
+  min-height:140px;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  font:inherit;
+  background:#fffdf9;
+  color:var(--dark);
+}
+
+.result{
+  text-align:center;
+  padding:25px 10px;
+}
+
+.score{
+  font-size:55px;
+  font-weight:900;
+  color:var(--brown);
+}
+
+.verdict{
+  font-size:21px;
+  font-weight:900;
+  margin:10px 0 20px;
+}
+
+.small{
+  color:#7b6a5d;
+  font-size:13px;
+  line-height:1.6;
+}
+
+@media(max-width:600px){
+  main{padding:12px}
+  .hero h1{font-size:24px}
+  .info-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="header-top">
+    <div class="logo">⚖️ APX LAWYER</div>
+    <div class="case-number">VỤ ÁN 010</div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+</header>
+
+<main>
+
+<!-- ================= INTRO ================= -->
+
+<section class="screen active" id="intro">
+
+  <div class="hero">
+    <span class="badge">HÌNH SỰ • TRANH TỤNG</span>
+    <h1>Chiếc xe trong đêm</h1>
+    <p>
+      Một vụ xô xát xảy ra trước cửa hàng lúc gần nửa đêm.
+      Thân chủ của bạn bị truy tố về hành vi cố ý gây thương tích.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>🎯 Vai trò của bạn</h3>
+    <p>
+      Bạn là <b>luật sư bào chữa</b>.
+      Nhiệm vụ không phải là “tìm hung thủ”, mà là xây dựng lập luận,
+      phản bác quan điểm của phía bên kia và bảo vệ quyền lợi hợp pháp
+      cho thân chủ.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>📌 Vụ việc</h3>
+
+    <div class="info-grid">
+      <div class="info">
+        <small>Bị cáo</small>
+        <strong>Nguyễn Minh Khang</strong>
+      </div>
+
+      <div class="info">
+        <small>Người bị hại</small>
+        <strong>Trần Quốc Hùng</strong>
+      </div>
+
+      <div class="info">
+        <small>Địa điểm</small>
+        <strong>Trước cửa hàng tiện lợi</strong>
+      </div>
+
+      <div class="info">
+        <small>Thời điểm</small>
+        <strong>23:40</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>⚠️ Mục tiêu phiên tranh luận</h3>
+    <ul>
+      <li>Xác định đúng vấn đề pháp lý.</li>
+      <li>Không để đối phương dẫn dắt lập luận.</li>
+      <li>Phản bác bằng logic thay vì cảm tính.</li>
+      <li>Bảo vệ quan điểm bào chữa đến cùng.</li>
+    </ul>
+  </div>
+
+  <button onclick="go('meeting')">Bắt đầu gặp thân chủ →</button>
+
+</section>
+
+
+<!-- ================= MEETING ================= -->
+
+<section class="screen" id="meeting">
+
+  <div class="hero">
+    <span class="badge">GIAI ĐOẠN 1</span>
+    <h1>Gặp thân chủ</h1>
+    <p>Trước khi tranh tụng, bạn cần xác định chính xác chiến lược.</p>
+  </div>
+
+  <div class="card">
+
+    <div class="dialogue">
+      <strong>Nguyễn Minh Khang</strong>
+      “Tôi không phủ nhận có đánh nhau.
+      Nhưng lúc đó anh Hùng lao vào tôi trước.
+      Tôi chỉ muốn đẩy anh ấy ra.”
+    </div>
+
+    <div class="dialogue">
+      <strong>Khang</strong>
+      “Sau khi anh ấy ngã xuống, tôi không đánh tiếp.
+      Tôi bỏ đi ngay.”
+    </div>
+
+    <div class="dialogue">
+      <strong>Khang</strong>
+      “Tôi biết anh Hùng bị thương,
+      nhưng tôi không cố ý làm anh ấy bị thương nặng như vậy.”
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h3>Bạn sẽ chọn hướng bào chữa chính nào?</h3>
+
+    <div class="btn-grid">
+
+      <button class="choice"
+        onclick="chooseStrategy('defense',this)">
+        <span class="tag">CHIẾN LƯỢC A</span>
+        Tập trung vào hoàn cảnh chống trả và tính cần thiết của hành vi.
+      </button>
+
+      <button class="choice"
+        onclick="chooseStrategy('intent',this)">
+        <span class="tag">CHIẾN LƯỢC B</span>
+        Tập trung vào việc chưa đủ cơ sở để suy ra ý chí gây thương tích.
+      </button>
+
+      <button class="choice"
+        onclick="chooseStrategy('mitigation',this)">
+        <span class="tag">CHIẾN LƯỢC C</span>
+        Không phủ nhận hoàn toàn hành vi, tập trung giảm mức độ bất lợi.
+      </button>
+
+    </div>
+
+    <br>
+
+    <button id="meetingNext" disabled onclick="go('arena')">
+      Vào phiên đối đáp →
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= ARENA ================= -->
+
+<section class="screen" id="arena">
+
+  <div class="hero">
+    <span class="badge">PHIÊN TRANH TỤNG</span>
+    <h1>Đối đáp</h1>
+    <p>
+      Luật sư bên kia sẽ đưa ra từng lập luận.
+      Bạn phải phản biện trực tiếp.
+    </p>
+  </div>
+
+  <div class="stats">
+
+    <div class="stat">
+      <small>PHÁP LÝ</small>
+      <strong id="legal">50</strong>
+      <div class="bar"><span id="legalBar" class="legal"></span></div>
+    </div>
+
+    <div class="stat">
+      <small>LOGIC</small>
+      <strong id="logic">50</strong>
+      <div class="bar"><span id="logicBar" class="logic"></span></div>
+    </div>
+
+    <div class="stat">
+      <small>ĐỐI ĐÁP</small>
+      <strong id="speech">50</strong>
+      <div class="bar"><span id="speechBar" class="speech"></span></div>
+    </div>
+
+    <div class="stat">
+      <small>THUYẾT PHỤC</small>
+      <strong id="persuade">50</strong>
+      <div class="bar"><span id="persuadeBar" class="persuade"></span></div>
+    </div>
+
+  </div>
+
+  <br>
+
+  <div class="card">
+
+    <span class="round" id="roundLabel">LƯỢT 1 / 5</span>
+
+    <div class="opponent">
+
+      <div class="name">
+        ⚖️ Luật sư phía bị hại
+      </div>
+
+      <div id="opponentText"></div>
+
+    </div>
+
+    <h3>Phản biện của bạn</h3>
+
+    <div class="btn-grid" id="choices"></div>
+
+    <div id="responseBox"></div>
+
+    <br>
+
+    <button id="nextRound" class="green" style="display:none"
+      onclick="nextRound()">
+      Tiếp tục đối đáp →
+    </button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= FINAL ARGUMENT ================= -->
+
+<section class="screen" id="final">
+
+  <div class="hero">
+    <span class="badge">GIAI ĐOẠN CUỐI</span>
+    <h1>Lời bào chữa cuối cùng</h1>
+    <p>
+      Đây là phần quan trọng nhất.
+      Hãy tổng hợp chiến lược thành một lập luận hoàn chỉnh.
+    </p>
+  </div>
+
+  <div class="card">
+
+    <h3>📢 Chủ tọa</h3>
+
+    <div class="dialogue">
+      “Luật sư bào chữa có thể trình bày quan điểm cuối cùng
+      trước khi Hội đồng xét xử nghị án.”
+    </div>
+
+    <h3>Hãy chọn cấu trúc bài bào chữa</h3>
+
+    <div class="btn-grid">
+
+      <button class="choice" onclick="chooseFinal('strong',this)">
+        <span class="tag">PHƯƠNG ÁN A</span>
+        Tập trung vào việc đánh giá toàn bộ diễn biến,
+        không tách riêng một hành vi khỏi hoàn cảnh xảy ra.
+      </button>
+
+      <button class="choice" onclick="chooseFinal('intent',this)">
+        <span class="tag">PHƯƠNG ÁN B</span>
+        Tập trung vào ý chí, mục đích và mức độ chủ quan của bị cáo.
+      </button>
+
+      <button class="choice" onclick="chooseFinal('balanced',this)">
+        <span class="tag">PHƯƠNG ÁN C</span>
+        Lập luận theo hướng cân bằng: nếu không chấp nhận toàn bộ
+        quan điểm bào chữa thì vẫn phải xem xét các yếu tố giảm nhẹ.
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>✍️ Viết bài bào chữa</h3>
+
+    <p class="small">
+      Trong phiên bản demo, hệ thống chấm dựa trên cấu trúc lập luận
+      và chiến lược bạn đã chọn.
+    </p>
+
+    <textarea id="speechText"
+      placeholder="Ví dụ: Kính thưa Hội đồng xét xử,..."></textarea>
+
+    <br><br>
+
+    <button onclick="finishCase()">Trình bày lời bào chữa</button>
+
+  </div>
+
+</section>
+
+
+<!-- ================= END ================= -->
+
+<section class="screen" id="ending">
+
+  <div class="hero result">
+
+    <span class="badge">KẾT QUẢ PHIÊN TÒA</span>
+
+    <div class="score" id="finalScore">0</div>
+
+    <div class="verdict" id="verdict"></div>
+
+    <p id="resultText"></p>
+
+  </div>
+
+  <div class="card">
+
+    <h3>📊 Đánh giá luật sư</h3>
+
+    <div class="stats">
+
+      <div class="stat">
+        <small>PHÁP LÝ</small>
+        <strong id="endLegal">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>LOGIC</small>
+        <strong id="endLogic">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>ĐỐI ĐÁP</small>
+        <strong id="endSpeech">0</strong>
+      </div>
+
+      <div class="stat">
+        <small>THUYẾT PHỤC</small>
+        <strong id="endPersuade">0</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>💡 Nhận xét</h3>
+
+    <p id="feedback"></p>
+
+  </div>
+
+  <button onclick="location.reload()">Chơi lại vụ án</button>
+
+</section>
+
+</main>
+</div>
+
+
+<script>
+
+const state = {
+
+  screen:"intro",
+
+  strategy:null,
+
+  final:null,
+
+  round:0,
+
+  legal:50,
+
+  logic:50,
+
+  speech:50,
+
+  persuade:50,
+
+  correct:0,
+
+  speechText:""
+
+};
+
+
+const rounds = [
+
+  {
+
+    text:
+    "Thân chủ của anh đã dùng vũ lực với anh Hùng. Việc anh ta nói mình chỉ muốn tự vệ không thể thay đổi sự thật rằng người bị hại đã bị thương.",
+
+    choices:[
+
+      {
+
+        text:
+        "Việc có sử dụng vũ lực không đồng nghĩa với việc mọi hành vi sử dụng vũ lực đều có cùng mục đích. Cần xem xét toàn bộ diễn biến và hoàn cảnh tại thời điểm xảy ra xô xát.",
+
+        legal:8,logic:8,speech:6,persuade:7,
+
+        good:true,
+
+        reply:
+        "Luật sư đã chuyển vấn đề từ “có dùng lực hay không” sang “hành vi xảy ra trong hoàn cảnh nào”. Đây là hướng phản biện đáng xem xét."
+
+      },
+
+      {
+
+        text:
+        "Thân chủ tôi không làm gì cả. Anh Hùng tự bị thương.",
+
+        legal:-6,logic:-8,speech:-4,persuade:-5,
+
+        reply:
+        "Nhưng chính thân chủ của anh đã thừa nhận có xô xát. Phủ nhận hoàn toàn như vậy khiến lập luận của phía bào chữa thiếu nhất quán."
+
+      },
+
+      {
+
+        text:
+        "Anh Hùng cũng có lỗi nên thân chủ tôi không có lỗi.",
+
+        legal:-3,logic:-6,speech:2,persuade:-3,
+
+        reply:
+        "Có lỗi từ phía người bị hại không tự động giải quyết toàn bộ trách nhiệm của bị cáo. Luật sư cần chứng minh mối liên hệ cụ thể."
+      }
+
+    ]
+
+  },
+
+
+  {
+
+    text:
+    "Nếu thân chủ của anh thực sự chỉ muốn thoát khỏi cuộc xô xát thì anh ta hoàn toàn có thể bỏ đi. Việc tiếp tục giằng co cho thấy anh ta chủ động đối đầu.",
+
+    choices:[
+
+      {
+
+        text:
+        "Khả năng bỏ đi phải được đánh giá trong hoàn cảnh thực tế. Một người đang bị tấn công không phải lúc nào cũng có đủ thời gian và điều kiện để lựa chọn phương án lý tưởng.",
+
+        legal:8,logic:9,speech:7,persuade:8,
+
+        good:true,
+
+        reply:
+        "Lập luận đã chỉ ra rằng không thể chỉ dùng giả định “đáng lẽ phải bỏ đi” để kết luận về hành vi tại thời điểm xô xát."
+
+      },
+
+      {
+
+        text:
+        "Không ai có nghĩa vụ phải bỏ chạy cả.",
+
+        legal:3,logic:2,speech:5,persuade:3,
+
+        reply:
+        "Câu trả lời có tính đối đáp nhưng chưa giải quyết trực tiếp vấn đề về hoàn cảnh cụ thể."
+
+      },
+
+      {
+
+        text:
+        "Anh Hùng đánh trước nên Khang muốn làm gì cũng được.",
+
+        legal:-8,logic:-9,speech:-3,persuade:-7,
+
+        reply:
+        "Không. Việc cho rằng một bên ra tay trước đồng nghĩa bên còn lại được làm bất cứ điều gì là một suy luận quá mức."
+
+      }
+
+    ]
+
+  },
+
+
+  {
+
+    text:
+    "Kết quả thương tích của anh Hùng cho thấy hậu quả đáng kể. Điều đó phù hợp với nhận định rằng hành vi của bị cáo có tính chất tấn công.",
+
+    choices:[
+
+      {
+
+        text:
+        "Hậu quả thương tích cần được xem xét, nhưng hậu quả không tự nó trả lời câu hỏi về mục đích và hoàn cảnh tạo ra hành vi. Hai vấn đề cần được phân tích riêng.",
+
+        legal:9,logic:9,speech:8,persuade:8,
+
+        good:true,
+
+        reply:
+        "Đúng. Luật sư đã tách được hai vấn đề: hậu quả thực tế và trạng thái, mục đích của người thực hiện hành vi."
+
+      },
+
+      {
+
+        text:
+        "Thương tích nặng hay nhẹ không quan trọng.",
+
+        legal:-7,logic:-7,speech:-2,persuade:-5,
+
+        reply:
+        "Hậu quả vẫn là một tình tiết quan trọng. Phủ nhận hoàn toàn giá trị của nó là không thuyết phục."
+
+      },
+
+      {
+
+        text:
+        "Kết quả thương tích là giả.",
+
+        legal:-6,logic:-8,speech:-5,persuade:-5,
+
+        reply:
+        "Luật sư chưa đưa ra căn cứ cho nhận định này."
+      }
+
+    ]
+
+  },
+
+
+  {
+
+    text:
+    "Thân chủ của anh đã thừa nhận có dùng lực. Vậy tại sao chúng tôi không thể xem đây là hành vi cố ý?",
+
+    choices:[
+
+      {
+
+        text:
+        "Thừa nhận một hành động không đồng nghĩa với việc thừa nhận mọi mục đích mà phía buộc tội gán cho hành động đó. Cần chứng minh thêm mối liên hệ giữa hành vi và ý chí.",
+
+        legal:10,logic:10,speech:9,persuade:9,
+
+        good:true,
+
+        reply:
+        "Đây là phản biện mạnh. Luật sư đã phân biệt hành vi khách quan với việc suy luận về ý chí, mục đích."
+
+      },
+
+      {
+
+        text:
+        "Vì Khang không muốn thế.",
+
+        legal:2,logic:3,speech:2,persuade:3,
+
+        reply:
+        "Đây chỉ là lời khẳng định. Cần lý giải tại sao có thể tin vào lời khai đó."
+
+      },
+
+      {
+
+        text:
+        "Vì mọi người đều có lúc mất kiểm soát.",
+
+        legal:-4,logic:-5,speech:3,persuade:-2,
+
+        reply:
+        "Lập luận mang tính cảm tính và chưa giải quyết câu hỏi pháp lý."
+
+      }
+
+    ]
+
+  },
+
+
+  {
+
+    text:
+    "Cho dù chấp nhận một phần quan điểm của anh, hành vi vẫn đã gây ra hậu quả cho người bị hại. Phía bào chữa đang cố giảm nhẹ một hành vi rõ ràng.",
+
+    choices:[
+
+      {
+
+        text:
+        "Bào chữa không có nghĩa phủ nhận hậu quả. Vấn đề là phải đánh giá đúng bản chất hành vi, hoàn cảnh xảy ra và mức độ trách nhiệm tương ứng, thay vì đồng nhất hậu quả với toàn bộ lỗi của bị cáo.",
+
+        legal:10,logic:10,speech:10,persuade:10,
+
+        good:true,
+
+        reply:
+        "Luật sư đã giữ được lập trường mà không phủ nhận hậu quả. Đây là cách kết thúc tranh luận khá chắc chắn."
+
+      },
+
+      {
+
+        text:
+        "Tôi không đồng ý.",
+
+        legal:0,logic:-2,speech:-3,persuade:-2,
+
+        reply:
+        "Phản bác nhưng chưa đưa ra lý do."
+
+      },
+
+      {
+
+        text:
+        "Người bị hại đáng bị như vậy.",
+
+        legal:-10,logic:-10,speech:-8,persuade:-10,
+
+        reply:
+        "Lập luận này mang tính công kích cá nhân và gây bất lợi nghiêm trọng cho phía bào chữa."
+      }
+
+    ]
+
+  }
+
+];
+
+
+function updateStats(){
+
+  state.legal=Math.max(0,Math.min(100,state.legal));
+  state.logic=Math.max(0,Math.min(100,state.logic));
+  state.speech=Math.max(0,Math.min(100,state.speech));
+  state.persuade=Math.max(0,Math.min(100,state.persuade));
+
+  document.getElementById("legal").textContent=state.legal;
+  document.getElementById("logic").textContent=state.logic;
+  document.getElementById("speech").textContent=state.speech;
+  document.getElementById("persuade").textContent=state.persuade;
+
+  document.getElementById("legalBar").style.width=state.legal+"%";
+  document.getElementById("logicBar").style.width=state.logic+"%";
+  document.getElementById("speechBar").style.width=state.speech+"%";
+  document.getElementById("persuadeBar").style.width=state.persuade+"%";
+}
+
+
+function go(id){
+
+  document.querySelectorAll(".screen")
+    .forEach(x=>x.classList.remove("active"));
+
+  document.getElementById(id)
+    .classList.add("active");
+
+  state.screen=id;
+
+  const map={
+    intro:5,
+    meeting:20,
+    arena:45,
+    final:80,
+    ending:100
+  };
+
+  document.getElementById("progress").style.width=
+    (map[id]||0)+"%";
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+  if(id==="arena"){
+    loadRound();
+    updateStats();
+  }
+}
+
+
+function chooseStrategy(strategy,button){
+
+  state.strategy=strategy;
+
+  document.querySelectorAll(".choice")
+    .forEach(x=>x.classList.remove("selected"));
+
+  button.classList.add("selected");
+
+  document.getElementById("meetingNext").disabled=false;
+
+}
+
+
+function loadRound(){
+
+  const r=rounds[state.round];
+
+  document.getElementById("roundLabel").textContent=
+    `LƯỢT ${state.round+1} / ${rounds.length}`;
+
+  document.getElementById("opponentText").textContent=r.text;
+
+  const box=document.getElementById("choices");
+
+  box.innerHTML="";
+
+  r.choices.forEach((choice,index)=>{
+
+    const btn=document.createElement("button");
+
+    btn.className="choice";
+
+    btn.innerHTML=
+      `<span class="tag">PHẢN BIỆN ${String.fromCharCode(65+index)}</span>
+       ${choice.text}`;
+
+    btn.onclick=()=>selectArgument(choice,btn);
+
+    box.appendChild(btn);
+
+  });
+
+  document.getElementById("responseBox").innerHTML="";
+  document.getElementById("nextRound").style.display="none";
+}
+
+
+function selectArgument(choice,button){
+
+  document.querySelectorAll("#choices button")
+    .forEach(x=>x.disabled=true);
+
+  button.classList.add("selected");
+
+  state.legal+=choice.legal;
+  state.logic+=choice.logic;
+  state.speech+=choice.speech;
+  state.persuade+=choice.persuade;
+
+  if(choice.good) state.correct++;
+
+  updateStats();
+
+  document.getElementById("responseBox").innerHTML=`
+    <div class="response">
+      <strong>⚖️ Phía bên kia phản hồi:</strong>
+      <p>${choice.reply}</p>
+    </div>
+  `;
+
+  document.getElementById("nextRound").style.display="block";
+
+}
+
+
+function nextRound(){
+
+  state.round++;
+
+  if(state.round>=rounds.length){
+
+    go("final");
+
+    return;
+
+  }
+
+  loadRound();
+
+}
+
+
+function chooseFinal(type,button){
+
+  state.final=type;
+
+  document.querySelectorAll("#final .choice")
+    .forEach(x=>x.classList.remove("selected"));
+
+  button.classList.add("selected");
+
+}
+
+
+function finishCase(){
+
+  if(!state.final){
+
+    alert("Hãy chọn cấu trúc bài bào chữa trước.");
+
+    return;
+
+  }
+
+  state.speechText=
+    document.getElementById("speechText").value.trim();
+
+  let score=
+    state.legal+
+    state.logic+
+    state.speech+
+    state.persuade;
+
+  score=score/4;
+
+  if(state.strategy==="defense") score+=4;
+
+  if(state.strategy==="intent") score+=3;
+
+  if(state.strategy==="mitigation") score+=2;
+
+  if(state.final==="strong") score+=7;
+
+  if(state.final==="intent") score+=5;
+
+  if(state.final==="balanced") score+=6;
+
+  if(state.speechText.length>=100) score+=5;
+
+  score=Math.round(Math.min(100,Math.max(0,score)));
+
+  document.getElementById("finalScore").textContent=score;
+
+  document.getElementById("endLegal").textContent=state.legal;
+  document.getElementById("endLogic").textContent=state.logic;
+  document.getElementById("endSpeech").textContent=state.speech;
+  document.getElementById("endPersuade").textContent=state.persuade;
+
+  let verdict="";
+  let result="";
+  let feedback="";
+
+  if(score>=85){
+
+    verdict="🏆 LUẬT SƯ BÀO CHỮA XUẤT SẮC";
+
+    result=
+      "Bạn kiểm soát tốt thế trận tranh luận, không để phía bên kia đánh đồng hậu quả với toàn bộ bản chất pháp lý của hành vi.";
+
+    feedback=
+      "Điểm mạnh nhất là khả năng tách từng vấn đề: hành vi, hoàn cảnh, ý chí và hậu quả. Bạn không phủ nhận sự việc một cách cực đoan mà tập trung vào điều cần chứng minh.";
+
+  }else if(score>=70){
+
+    verdict="🥇 MỘT PHIÊN BÀO CHỮA TỐT";
+
+    result=
+      "Bạn giữ được lập trường và phản bác được phần lớn lập luận của phía bên kia.";
+
+    feedback=
+      "Bạn có nền tảng tranh tụng khá tốt. Tuy nhiên một số câu trả lời vẫn thiên về khẳng định thay vì giải thích logic.";
+
+  }else if(score>=55){
+
+    verdict="⚖️ BÀO CHỮA Ở MỨC KHÁ";
+
+    result=
+      "Bạn chưa bị áp đảo nhưng vẫn để phía bên kia chiếm thế chủ động ở một số thời điểm.";
+
+    feedback=
+      "Hãy tập trung vào việc trả lời đúng câu hỏi đối phương đặt ra. Đừng chuyển sang công kích người bị hại hoặc phủ nhận những điều thân chủ đã thừa nhận.";
+
+  }else{
+
+    verdict="📚 CẦN LUYỆN THÊM";
+
+    result=
+      "Phía bên kia đã kiểm soát phần lớn cuộc tranh luận.";
+
+    feedback=
+      "Điểm yếu chính là lập luận chưa đủ chặt. Trong tranh tụng, không chỉ cần nói mình đúng mà phải chỉ ra vì sao lập luận của đối phương chưa đủ để đi đến kết luận.";
+
+  }
+
+  document.getElementById("verdict").textContent=verdict;
+  document.getElementById("resultText").textContent=result;
+  document.getElementById("feedback").textContent=feedback;
+
+  go("ending");
+
+}
+
+
+updateStats();
+
+</script>
+
+</body>
+</html>

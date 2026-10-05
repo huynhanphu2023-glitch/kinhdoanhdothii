@@ -161,6 +161,13 @@ và mức độ lỗi, nhưng cần xem xét phương pháp và phạm vi kiểm
       requiresEvidence: ["E406", "E407", "E409", "E410"],
       requiresLaw: ["LAW401", "LAW406"],
       effects: { legalAnalysis: 8, evidence: 8, procedure: 6, argument: 9, caseUnderstanding: 7, clientTrust: 1 }
+    },
+    {
+      id: "defer-conclusion",
+      title: "Chưa đủ căn cứ để chốt yêu cầu thanh toán",
+      rationale: "Thừa nhận rằng hồ sơ hiện chưa đủ chứng cứ để khẳng định phạm vi hàng đạt chuẩn hoặc mức thiệt hại; đề nghị bổ sung tài liệu trước khi chốt yêu cầu.",
+      tradeoff: "Tránh yêu cầu vượt quá căn cứ nhưng chưa bảo vệ được quyền thu hồi công nợ của Minh Phát.",
+      effects: { legalAnalysis: -8, evidence: -8, procedure: -8, argument: -8, caseUnderstanding: -8, clientTrust: -5 }
     }
   ],
 
