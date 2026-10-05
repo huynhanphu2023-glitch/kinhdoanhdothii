@@ -32,7 +32,7 @@ PWA lưu cache phần vỏ ứng dụng và các tài nguyên cốt lõi để t
 - **Nhân viên:** danh sách, tuyển dụng, phòng ban và đào tạo.
 - **Túi đồ / Shop:** vật phẩm đang sở hữu; vé tuyển dụng dùng trong **Nhân viên → Tuyển dụng**. Xem trước lương và hiệu suất của tối đa 3 ứng viên luân phiên theo ngày game trước khi chọn; chỉ trừ vé khi xác nhận tuyển. Lương nhân viên được tính khi công ty đóng sổ ngày.
 - **Đầu tư:** thị trường, danh mục và lịch sử giao dịch.
-- **Cộng đồng:** người chơi, bảng xếp hạng, chat và tin nhắn.
+- **Cộng đồng:** người chơi, bảng xếp hạng, chat và tin nhắn. Chat tổng có bong bóng nổi trên mọi màn hình; có thể kéo bong bóng hoặc thanh tiêu đề để di chuyển.
 - **Cuộc sống CEO (APX LIFE):** nhà, garage, trang trí, thành phố, mạng xã hội, bạn bè, nhật ký và cửa hàng cuộc sống.
 - **APXBank:** tài khoản, nạp/rút từ ví game, chuyển tiền cho người chơi, tiết kiệm kỳ hạn, khoản vay trả theo ngày game, điểm tín dụng, thông báo và lịch sử.
 
