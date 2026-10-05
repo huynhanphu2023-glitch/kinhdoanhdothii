@@ -4874,6 +4874,26 @@ input:focus {
 .community-chat-message p { margin: 5px 0 0; color: var(--text-primary, #f1eee4); overflow-wrap: anywhere; white-space: pre-wrap; }
 .community-chat-form { display: flex; align-items: end; gap: 10px; }
 .community-chat-form textarea { flex: 1; min-height: 48px; max-height: 130px; resize: vertical; padding: 11px; border: 1px solid var(--line, rgba(160,184,190,.2)); border-radius: 9px; color: var(--text-primary, #f1eee4); background: #09151b; font: inherit; }
+.global-chat-widget-root { position: fixed; right: 20px; bottom: 20px; z-index: 1200; display: flex; width: min(380px, calc(100vw - 24px)); align-items: flex-end; flex-direction: column; gap: 10px; }
+.global-chat-widget-root.is-dragging { user-select: none; }
+.global-chat-widget-panel { display: grid; width: 100%; max-height: min(560px, calc(100vh - 110px)); grid-template-rows: auto auto minmax(120px, 1fr) auto; gap: 10px; overflow: hidden; padding: 12px; border: 1px solid var(--apx-line-strong); border-radius: 14px; color: var(--apx-text); background: var(--apx-panel); box-shadow: 0 16px 48px rgba(0, 0, 0, .28); }
+.global-chat-widget-header { display: flex; min-height: 38px; align-items: center; justify-content: space-between; gap: 12px; cursor: move; touch-action: none; }
+.global-chat-widget-header > div:first-child { display: grid; gap: 3px; }
+.global-chat-widget-header strong { color: var(--apx-text); font-size: 14px; }
+.global-chat-widget-header small,.global-chat-widget-status,.global-chat-widget-locked { color: var(--apx-muted); font-size: 11px; }
+.global-chat-widget-controls { display: flex; gap: 6px; }
+.global-chat-widget-close { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--apx-line); border-radius: 8px; color: var(--apx-text); background: var(--apx-panel-light); cursor: pointer; font: inherit; font-size: 18px; }
+.global-chat-widget-list { min-height: 120px; max-height: min(340px, 45vh); padding: 4px; touch-action: pan-y; }
+.global-chat-widget-form { align-items: stretch; }
+.global-chat-widget-form textarea { min-width: 0; min-height: 42px; max-height: 92px; resize: vertical; color: var(--apx-text); background: var(--apx-panel-light); }
+.global-chat-widget-form .button { flex: 0 0 auto; min-height: 42px; }
+.global-chat-widget-status,.global-chat-widget-locked { margin: 0; }
+.global-chat-widget-launcher { display: flex; min-height: 50px; align-items: center; gap: 9px; padding: 0 18px; border: 1px solid rgba(255,255,255,.28); border-radius: 28px; color: #302A27; background: var(--apx-gold); box-shadow: 0 8px 28px rgba(0,0,0,.24); cursor: grab; touch-action: none; }
+.global-chat-widget-launcher:active { cursor: grabbing; }
+.global-chat-widget-launcher span { font-size: 21px; }
+.global-chat-widget-launcher strong { font-size: 12px; }
+.global-chat-widget-panel .community-chat-message > div > p { overflow-wrap: anywhere; }
+.global-chat-widget-locked + .button { justify-self: start; }
 .community-chat-heading { display: flex; align-items: center; gap: 12px; color: var(--gold, #e8c879); }
 .community-inbox { display: grid; gap: 8px; }
 .community-inbox-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px; color: var(--text-primary, #f1eee4); text-align: left; cursor: pointer; }
@@ -4889,6 +4909,10 @@ input:focus {
   .community-player-row > .community-amount { grid-column: 2 / 4; grid-row: 3; text-align: left; }
   .community-player-row > .community-profile-button { grid-column: 3; grid-row: 1; }
   .community-chat-form { align-items: stretch; flex-direction: column; }
+  .global-chat-widget-form { align-items: stretch; flex-direction: row; }
+  .global-chat-widget-root { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); width: min(380px, calc(100vw - 24px)); }
+  .global-chat-widget-panel { max-height: min(480px, calc(100dvh - 92px)); }
+  .global-chat-widget-list { max-height: min(290px, 40dvh); }
   .public-player-hero { grid-template-columns: auto minmax(0,1fr); gap: 12px; padding: 48px 16px 16px; }
   .public-player-hero > .button-gold { grid-column: 1 / -1; width: 100%; }
   .public-profile-avatar { width: 68px; height: 84px; }
