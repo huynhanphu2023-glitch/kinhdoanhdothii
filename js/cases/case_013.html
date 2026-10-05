@@ -89,6 +89,8 @@ function finalResult() {
 }
 function render() {
   app.innerHTML = screens[state.chapter] || screens[screens.length - 1];
+  var currentScreen = app.querySelector(".screen");
+  if (currentScreen) currentScreen.classList.add("active");
   progress.style.width = Math.round(state.chapter / Math.max(1, screens.length - 1) * 100) + "%";
   phase.textContent = phaseNames[state.chapter] || "VỤ ÁN 013";
   updateMetrics();
