@@ -4832,10 +4832,8 @@ input:focus {
 .public-player-stats strong { color: var(--gold, #e8c879); }
 .public-player-hero { position: relative; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 18px; padding: 48px 24px 24px; }
 .public-profile-close { position: absolute; top: 12px; right: 12px; }
-.public-profile-avatar { width: 88px; height: 104px; border-radius: 16px; }
-.public-profile-avatar img { object-fit: contain; background: rgba(5,14,20,.35); }
-.public-profile-character { display: grid; width: 132px; height: 184px; align-items: end; justify-items: center; overflow: hidden; }
-.public-profile-character img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+.public-profile-avatar { width: 88px; height: 88px; border-radius: 50%; }
+.public-profile-avatar img { object-fit: cover; }
 .public-profile-identity { display: grid; min-width: 0; gap: 5px; }
 .public-profile-identity h2 { margin: 0; overflow-wrap: anywhere; }
 .public-profile-identity > span:not(.eyebrow) { color: var(--text-muted, #9eb0b3); font-size: 12px; }
@@ -4915,8 +4913,7 @@ input:focus {
   .global-chat-widget-list { max-height: min(290px, 40dvh); }
   .public-player-hero { grid-template-columns: auto minmax(0,1fr); gap: 12px; padding: 48px 16px 16px; }
   .public-player-hero > .button-gold { grid-column: 1 / -1; width: 100%; }
-  .public-profile-avatar { width: 68px; height: 84px; }
-  .public-profile-character { width: 88px; height: 132px; }
+  .public-profile-avatar { width: 68px; height: 68px; }
   .public-player-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .public-company-grid { grid-template-columns: minmax(0,1fr); }
   .public-life-houses { grid-template-columns: minmax(0,1fr); }
