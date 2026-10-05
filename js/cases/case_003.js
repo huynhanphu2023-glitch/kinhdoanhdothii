@@ -225,7 +225,8 @@ Quyền biểu quyết phụ thuộc vào tư cách thành viên và tỷ lệ p
     }
   ],
 
-  mechanicsVersion: 3,
+  mechanicsVersion: 4,
+  confirmAnswers: true,
 
   finalArguments: [
     {

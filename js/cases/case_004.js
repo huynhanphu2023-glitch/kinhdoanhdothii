@@ -132,7 +132,8 @@ và mức độ lỗi, nhưng cần xem xét phương pháp và phạm vi kiểm
     }
   ],
 
-  mechanicsVersion: 3,
+  mechanicsVersion: 4,
+  confirmAnswers: true,
 
   finalArguments: [
     {
