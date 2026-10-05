@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f3e9dc">
+<title>APX Lawyer — Vụ án 014</title>
+<style>
+:root{--bg:#f3e9dc;--panel:#fffaf4;--ink:#3d3027;--muted:#77685c;--accent:#8b6f5a;--line:#dfd0c1;--good:#4e7757;--warn:#8b693e;--bad:#9a4f45}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{border:0;border-radius:10px;padding:9px 13px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}button.secondary{background:#e6d8ca;color:var(--ink)}button:disabled{opacity:.5;cursor:not-allowed}header{position:sticky;top:0;z-index:4;background:#fffaf4ed;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}.top{max-width:1180px;margin:auto;padding:12px 18px}.topline,.row,.toolbar,.tabbar,.cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.top h1{font-size:19px;line-height:1.3;margin:0}.muted,.small{color:var(--muted)}.small{font-size:12px}.wrap{max-width:1180px;margin:auto;padding:18px}.tabs{display:flex;gap:6px;overflow:auto;margin:12px 0;padding-bottom:3px}.tab{background:#e8dbce;color:var(--ink);white-space:nowrap}.tab[aria-selected=true]{background:var(--accent);color:white}.panel,.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px;margin-bottom:12px;box-shadow:0 3px 12px #5c463310}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}.stack{display:grid;gap:9px}.badge{display:inline-block;border-radius:99px;padding:2px 9px;background:#eadfd4;font-size:12px;margin:2px}.badge.warn{background:#f3e3c9}.badge.good{background:#e1ecdf}.badge.bad{background:#f0dbd7}.callout{border-left:4px solid var(--accent);padding:10px 12px;background:#f7eee5;border-radius:6px;margin:12px 0}.field{display:grid;gap:5px;margin:9px 0}.field input,.field select,.field textarea,.search{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fffdf9;color:var(--ink)}.field textarea{min-height:76px;resize:vertical}.search{max-width:420px}.doc{padding:12px;border:1px solid var(--line);border-radius:12px;background:#fffdf9}.doc h3{font-size:15px;margin:0 0 5px}.doc p{margin:6px 0}.evidence{border:1px solid var(--line);border-radius:12px;background:#fffdf9}.evidence summary{cursor:pointer;padding:10px 12px;font-weight:700}.evidence .body{padding:0 12px 12px}.evidence[hidden],.hidden{display:none!important}.timeline{border-left:2px solid var(--line);margin:8px 0 8px 8px;padding-left:15px}.event{position:relative;margin:0 0 12px}.event:before{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:var(--accent);left:-20px;top:7px}.event time{font-weight:800}.witness h3{margin:0}.progress{height:7px;background:#e5d8ca;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;background:var(--accent)}.note{font-size:13px;background:#f7eee5;padding:8px 10px;border-radius:9px}.checkrow{display:flex;gap:8px;align-items:flex-start;margin:6px 0}.checkrow input{margin-top:5px}#toast{position:fixed;right:15px;bottom:15px;z-index:10;max-width:340px;padding:12px 14px;background:#302923;color:white;border-radius:11px;display:none}.verdict{border-top:3px solid var(--accent);padding-top:15px}.verdict h2{line-height:1.3}.toolbar{margin:10px 0}@media(max-width:600px){.wrap{padding:12px}.top{padding:10px 12px}.panel,.card{padding:13px}.tabs{margin:8px 0}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="topline"><div><h1 id="caseTitle">APX Lawyer — Vụ án 014</h1><div class="small" id="caseSubtitle">Hồ sơ bào chữa hình sự</div></div><button class="secondary" type="button" id="saveStatus">Đã lưu trên thiết bị</button></div><div class="progress" aria-label="Tiến độ hồ sơ"><i id="progressBar"></i></div><div class="topline small"><span id="phaseLabel">ĐỌC CÁO TRẠNG</span><span id="caseMetrics"></span></div></div></header>
+<main class="wrap">
+<nav class="tabs" id="tabs" role="tablist" aria-label="Các phần hồ sơ"></nav>
+<section id="app" aria-live="polite"></section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="case_014_data.js"></script>
+<script>
+(function () {
+"use strict";
+var D = window.APX_CASE_014_DATA;
+if (!D || !Array.isArray(D.evidence) || !Array.isArray(D.timeline)) {
+  document.getElementById("app").innerHTML = "<section class='panel'><h2>Không tải được hồ sơ</h2><p>Không thể mở dữ liệu Vụ án 014. Hãy tải lại trang hoặc báo lỗi cho quản trị viên.</p></section>";
+  console.error("Case 014 data bundle is missing or invalid.");
+  return;
+}
+var storeKey = "apx_s14_defense_v1";
+var tabs = [
+  ["file","Hồ sơ"],["evidence","Chứng cứ"],["timeline","Timeline"],
+  ["witnesses","Nhân chứng"],["requests","Yêu cầu tài liệu"],
+  ["strategy","Chiến lược bào chữa"],["court","Phiên tòa"],["defense","Bản bào chữa cuối"],["judgment","Bản án"]
+];
+var issueTagsByStrategy = {time:"time",device:"location",location:"location",trace:"forensic",physical:"forensic",identity:"identity",statement:"witness",witness:"witness",chain:"chain",motive:"motive",alternative:"alternative",procedure:"procedure"};
+var issues = (D.strategyCategories || []).map(function(item){return {id:item.id,title:item.title,question:item.question||item.objective||item.title};});
+if(!issues.some(function(item){return item.id==="motive";}))issues.push({id:"motive",title:"Động cơ không thay thế chứng minh hành vi",question:"Tách mâu thuẫn và liên lạc khỏi chứng cứ về hành vi gây thương tích."});
+function issueTags(e){if(Array.isArray(e.issues)&&e.issues.length)return e.issues;var tags=[];
+  (D.strategyCategories||[]).forEach(function(item){if((item.evidenceIds||[]).indexOf(e.id)>=0&&issueTagsByStrategy[item.id])tags.push(issueTagsByStrategy[item.id]);});
+  if(!tags.length){var category=String(e.category||"").toLowerCase();if(category.indexOf("legal")>=0)tags.push("procedure");else if(category.indexOf("call")>=0)tags.push("motive","time");else if(category.indexOf("physical")>=0)tags.push("forensic");else if(category.indexOf("camera")>=0)tags.push("time","location");else tags.push("witness","forensic");}
+  e.issues=Array.from(new Set(tags));return e.issues;}
+(D.evidence||[]).forEach(issueTags);
+var courtPhases = D.courtPhases || [];
+if(courtPhases.length<13){
+  var courtTemplates=[
+    ["opening","Công bố cáo trạng","Chọn vấn đề cần kiểm tra trước; chưa kết luận cáo buộc là sự thật.","procedure"],
+    ["prosecution","Công tố trình bày chứng cứ","Tách nội dung tài liệu khỏi suy luận được rút ra từ tài liệu.","chain"],
+    ["review","Luật sư kiểm tra chứng cứ","Xác định nguồn, cách lập và giới hạn chứng minh của tài liệu buộc tội.","chain"],
+    ["witness","Thẩm vấn nhân chứng","Đối chiếu điều người làm chứng trực tiếp thấy với điều họ suy ra sau đó.","witness"],
+    ["confrontation","Đối chất","Đặt lời khai cạnh mốc giờ, góc nhìn và tài liệu độc lập.","witness"],
+    ["physical","Tranh luận chứng cứ vật chất","Tách tương thích mẫu khỏi thời điểm và cơ chế hình thành dấu vết.","forensic"],
+    ["timeline","Tranh luận timeline","So sánh đồng hồ camera, điện thoại, máy chủ và sai số ước lượng.","time"],
+    ["identification","Tranh luận nhận dạng","Kiểm tra điều kiện quan sát, thủ tục nhận dạng và ảnh hưởng thông tin.","identity"],
+    ["motive","Tranh luận động cơ","Thừa nhận mâu thuẫn nếu có nhưng không coi động cơ là bằng chứng thực hiện hành vi.","motive"],
+    ["prosecution","Luận tội","Kiểm tra mắt xích nào là sự kiện, mắt xích nào là suy luận tích lũy.","alternative"],
+    ["defense","Bào chữa","Ghép các giới hạn đã được đối chiếu; không cần kết tội một người khác.","chain"],
+    ["deliberation","Tòa nghị án","Cân nhắc chứng cứ buộc tội, nội dung phản biện và điều còn chưa được làm rõ.","procedure"],
+    ["ruling","Tuyên án","Chọn kết cục phù hợp với chuỗi chứng cứ và giải thích lý do.","procedure"]
+  ];
+  courtPhases=courtTemplates.map(function(t,i){var base=(D.courtPhases||[])[Math.min(i,(D.courtPhases||[]).length-1)]||{};return {id:t[0],stage:t[1],title:t[1],prompt:base.task||t[2],issue:t[3],evidenceIds:base.evidenceIds||[]};});
+}
+var state = {
+  tab:"file", unlocked: D.evidence.filter(function(e){return e.available;}).map(function(e){return e.id;}),
+  requested:[], statements:[], strategies:{}, hypothesis:"", courtIndex:0, examination:{},
+  final:{strongest:"",weakness:"",contradiction:"",gap:"",witness:"",presence:"",act:"",alternative:"",chain:""},
+  submitted:false, judgment:null, openedEvidence:[], log:[]
+};
+var app=document.getElementById("app"), toastTimer;
+function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function notify(s){var t=document.getElementById("toast");t.textContent=s;t.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.style.display="none";},2500);}
+function evidenceById(id){return D.evidence.find(function(e){return e.id===id;});}
+function unlockedEvidence(){return D.evidence.filter(function(e){return state.unlocked.indexOf(e.id)>=0;});}
+function save(){try{localStorage.setItem(storeKey,JSON.stringify(state));document.getElementById("saveStatus").textContent="Đã lưu trên thiết bị";}catch(e){console.error("Cannot save S14 progress.",e);document.getElementById("saveStatus").textContent="Chưa lưu được";}}
+function load(){try{var raw=localStorage.getItem(storeKey);if(!raw)return;var s=JSON.parse(raw);if(!s||typeof s!=="object")throw new Error("Invalid save");
+  if(Array.isArray(s.unlocked))state.unlocked=s.unlocked.filter(function(id){return !!evidenceById(id);});
+  ["requested","statements","openedEvidence","log"].forEach(function(k){if(Array.isArray(s[k]))state[k]=s[k];});
+  if(tabs.some(function(t){return t[0]===s.tab;}))state.tab=s.tab;
+  if(s.strategies&&typeof s.strategies==="object")state.strategies=s.strategies;
+  if(typeof s.hypothesis==="string")state.hypothesis=s.hypothesis;
+  if(Number.isInteger(s.courtIndex))state.courtIndex=Math.max(0,Math.min(courtPhases.length,s.courtIndex));
+  if(s.examination&&typeof s.examination==="object")state.examination=s.examination;
+  if(s.final&&typeof s.final==="object")state.final=Object.assign(state.final,s.final);
+  state.submitted=Boolean(s.submitted);state.judgment=s.judgment||null;
+ }catch(e){console.error("Could not restore S14 progress.",e);notify("Tiến trình cũ bị lỗi; đã mở hồ sơ mới.");}}
+function metrics(){var broken=Object.keys(state.strategies).filter(function(k){return state.strategies[k]&&state.strategies[k].support&&state.strategies[k].rebut;}).length;
+  document.getElementById("caseMetrics").textContent="Tài liệu "+state.unlocked.length+"/"+D.evidence.length+" · Luận điểm "+broken+"/"+issues.length+" · Nhân chứng "+state.statements.length+"/"+D.witnesses.length;
+  var ratio=(state.submitted?1:(state.courtIndex/courtPhases.length*.22+state.unlocked.length/D.evidence.length*.18+broken/issues.length*.25+state.statements.length/D.witnesses.length*.15));
+  document.getElementById("progressBar").style.width=Math.round(Math.min(1,ratio)*100)+"%";
+}
+function renderTabs(){document.getElementById("tabs").innerHTML=tabs.map(function(t){return "<button class='tab' role='tab' aria-selected='"+(state.tab===t[0])+"' data-tab='"+t[0]+"'>"+esc(t[1])+"</button>";}).join("");}
+function getOptions(selected){return "<option value=''>Chọn tài liệu đã mở</option>"+unlockedEvidence().map(function(e){return "<option value='"+esc(e.id)+"'"+(selected===e.id?" selected":"")+">"+esc(e.id+" — "+e.title)+"</option>";}).join("");}
+function panel(title,content,sub){return "<section class='panel'><div class='cardhead'><h2>"+esc(title)+"</h2>"+(sub||"")+"</div>"+content+"</section>";}
+function renderFile(){var f=D.facts, accused=typeof f.accused==="string"?f.accused:f.accused&&f.accused.name||"Chưa ghi";var victim=typeof f.victim==="string"?f.victim:f.victim&&f.victim.name||"Chưa ghi";
+  return panel("Bản cáo trạng", "<p class='badge bad'>CÁO BUỘC: "+esc(f.charge||"Hành vi gây thương tích dẫn đến tử vong")+"</p><p>"+esc(f.indictment)+"</p>"+
+  "<div class='grid'><div class='card'><b>Bị cáo</b><p>"+esc(accused)+"</p></div><div class='card'><b>Nạn nhân</b><p>"+esc(victim)+"</p></div><div class='card'><b>Khoảng thời gian tử vong theo công tố</b><p>"+esc(f.prosecutionWindow||"Theo cáo trạng và tài liệu pháp y; cần đối chiếu sai số.")+"</p></div></div>"+
+  "<div class='callout'><b>Nhiệm vụ bào chữa</b><br>Không cần tìm một người khác để kết tội. Hãy kiểm tra từng mắt xích: chứng cứ nào được thu thập thế nào, nó chứng minh chính xác điều gì, và chuỗi suy luận còn đứng vững đến đâu.</div>"+
+  "<p>"+esc(f.caseSummary||f.summary||"")+"</p><div class='toolbar'><button data-tab='evidence'>Mở kho chứng cứ</button><button class='secondary' data-tab='requests'>Yêu cầu hồ sơ bổ sung</button></div>"+
+  "<h3>Các phần việc</h3><div class='grid'>"+tabs.slice(1,8).map(function(t){return "<button class='secondary' data-tab='"+t[0]+"'>"+esc(t[1])+"</button>";}).join("")+"</div>"+
+  "<h3>Nhật ký bào chữa</h3>"+(state.log.length?"<ol>"+state.log.map(function(line){return "<li>"+esc(line)+"</li>";}).join("")+"</ol>":"<p class='small'>Các yêu cầu tài liệu và bước làm việc ở phiên tòa sẽ được ghi tại đây.</p>")+
+  "<p class='small'>Đây là vụ án hư cấu phục vụ giải trí và tư duy phản biện; không phải tư vấn pháp lý.</p>");}
+function renderEvidence(){var list=unlockedEvidence(), term=(document.getElementById("evidenceSearch")||{}).value||"", cat=(document.getElementById("evidenceCategory")||{}).value||"";
+  term=term.toLocaleLowerCase("vi-VN");var categories=Array.from(new Set(D.evidence.map(function(e){return e.category;})));
+  var filtered=list.filter(function(e){return (!cat||e.category===cat)&&(!term||(e.id+" "+e.title+" "+e.content+" "+e.source).toLocaleLowerCase("vi-VN").includes(term));});
+  return panel("Kho chứng cứ","<div class='toolbar'><input class='search' id='evidenceSearch' type='search' placeholder='Tìm mã, tên, nguồn, nội dung' value='"+esc((document.getElementById("evidenceSearch")||{}).value||"")+"'><select class='search' id='evidenceCategory'><option value=''>Mọi nhóm đã mở</option>"+categories.map(function(c){return "<option"+(cat===c?" selected":"")+">"+esc(c)+"</option>";}).join("")+"</select></div><p class='small'>Đọc giới hạn chứng minh, nguồn, độ tin cậy và liên kết. Tài liệu chưa được nhận sẽ mở dần qua Yêu cầu tài liệu.</p>"+
+  "<div class='stack'>"+(filtered.length?filtered.map(function(e){var open=state.openedEvidence.indexOf(e.id)>=0;return "<details class='evidence' data-evidence='"+esc(e.id)+"'"+(open?" open":"")+"><summary>"+esc(e.id+" — "+e.title)+" <span class='badge'>"+esc(e.category)+"</span></summary><div class='body'><p><b>Thời gian:</b> "+esc(e.time)+"<br><b>Nguồn:</b> "+esc(e.source)+"</p><p>"+esc(e.content)+"</p><p><b>Chứng minh được:</b> "+esc(e.proves)+"</p><p><b>Không chứng minh được:</b> "+esc(e.doesNotProve)+"</p><p><b>Độ tin cậy:</b> "+esc(e.reliability)+"</p><p><b>Liên kết:</b> "+esc((e.links||[]).join(", ")||"Chưa có liên kết trực tiếp")+"</p>"+(e.contradiction?"<p><b>Điểm cần đối chiếu:</b> "+esc(e.contradiction)+"</p>":"")+"<p class='small'>Góc phân tích: "+esc((e.issues||[]).join(", "))+"</p></div></details>";}).join(""):"<div class='callout'>Không có tài liệu khớp bộ lọc. Có thể tài liệu chưa được yêu cầu mở.</div>")+"</div>");}
+function renderTimeline(){var ordered=D.timeline.slice();
+  return panel("Timeline đối chiếu", "<p>Mốc giờ từ camera, điện thoại, máy chủ và lời khai có thể dùng đồng hồ khác nhau. Đọc nguồn và sai số trước khi ghép sự kiện thành một trình tự.</p><div class='timeline'>"+ordered.map(function(e){return "<article class='event'><time>"+esc(e.time)+"</time> <span class='badge'>"+esc(e.type||e.sourceType||"Hồ sơ")+"</span><div>"+esc(e.description)+"</div><div class='small'>Nguồn: "+esc(e.source)+" · Sai số/độ bất định: "+esc(e.uncertainty||e.clockOffset||"Chưa xác định")+" · Liên kết: "+esc((e.links||[]).join(", "))+"</div></article>";}).join("")+"</div>");}
+function renderWitnesses(){return panel("Nhân chứng và người liên quan","<p>Đọc lời khai ban đầu và bổ sung như những dữ liệu cần kiểm chứng. Sai khác trong lời khai không tự động đồng nghĩa với cố ý nói dối.</p><div class='stack'>"+D.witnesses.map(function(w){var seen=state.statements.indexOf(w.id)>=0;var statements=w.statements||[].concat(w.initialStatements||[],w.supplementalStatements||[]);return "<details class='evidence witness' data-witness='"+esc(w.id)+"'><summary><b>"+esc(w.name)+"</b> · "+esc(w.role)+" <span class='badge"+(seen?" good":"")+"'>"+(seen?"Đã đọc":"Chưa đọc")+"</span></summary><div class='body'><p><b>Điều thực sự biết:</b> "+esc(w.knows||w.trulyKnows)+"</p><p><b>Điều họ tưởng mình biết:</b> "+esc(w.assumes||w.thinksKnows)+"</p><p><b>Động cơ nhầm lẫn/che giấu:</b> "+esc(w.motive||w.motiveToLieOrMisremember)+"</p><p><b>Có thể kiểm chứng bằng:</b> "+esc(w.verifiable||w.verifiableInfo)+"</p><p><b>Mâu thuẫn cần đối chiếu:</b> "+esc(w.contradiction)+"</p><h4>Lời khai ban đầu</h4>"+statements.slice(0,2).map(function(s){return "<blockquote>"+esc(s)+"</blockquote>";}).join("")+"<h4>Lời khai bổ sung</h4>"+statements.slice(2).map(function(s){return "<blockquote>"+esc(s)+"</blockquote>";}).join("")+"<button data-action='read-witness' data-witness-id='"+esc(w.id)+"'"+(seen?" disabled":"")+">"+(seen?"Đã ghi nhận":"Ghi nhận nội dung đã đọc")+"</button></div></details>";}).join("")+"</div>");}
+function renderRequests(){var categories=Array.from(new Set(D.evidence.map(function(e){return e.category;})));
+  var requests=categories.map(function(c){var available=D.evidence.filter(function(e){return e.category===c&&state.unlocked.indexOf(e.id)<0;}).length;var asked=state.requested.indexOf(c)>=0;return "<article class='doc'><h3>"+esc(c)+"</h3><p>"+available+" tài liệu đang cần yêu cầu mở.</p><button data-action='request-category' data-category='"+esc(c)+"'"+(!available?" disabled":"" )+">"+(!available?"Đã nhận đủ":asked?"Yêu cầu bổ sung":"Gửi yêu cầu tài liệu")+"</button></article>";}).join("");
+  var docs=(D.legalDocs||[]).map(function(d){var evidenceIds=d.evidenceIds||[d.evidenceId].filter(Boolean);var isOpen=evidenceIds.some(function(id){return state.unlocked.indexOf(id)>=0;});return "<div class='doc'><h3>"+esc(d.title)+"</h3><p>"+esc(d.description||d.summary)+"</p><p class='small'>Liên kết: "+esc(evidenceIds.join(", "))+"</p>"+(isOpen?"<span class='badge good'>Đã nhận</span>":"<span class='badge'>Chưa nhận</span>")+"</div>";}).join("");
+  return panel("Yêu cầu tài liệu bổ sung","<p>Yêu cầu được ghi vào nhật ký bào chữa. Không phải cứ tài liệu bất lợi cho công tố là có lợi cho bị cáo; hãy kiểm tra cả nguồn và giới hạn.</p><div class='grid'>"+requests+"</div><h3>Danh mục tài liệu thủ tục</h3><div class='grid'>"+docs+"</div>");}
+function renderStrategy(){var ids=unlockedEvidence();
+  return panel("Bảng chiến lược bào chữa","<p>Mỗi hàng cần chứng cứ ủng hộ, chứng cứ bất lợi/kiểm tra chéo, mức chắc chắn và một điểm yếu. Ghi nhận chiến lược, không bật nhãn đúng/sai.</p><div class='stack'>"+issues.map(function(it){var s=state.strategies[it.id]||{};return "<article class='doc' data-strategy='"+esc(it.id)+"'><h3>"+esc(it.title)+"</h3><p>"+esc(it.question)+"</p><div class='grid'><label class='field'>Chứng cứ hỗ trợ<select data-field='support'>"+getOptions(s.support)+"</select></label><label class='field'>Chứng cứ phản bác/đối chiếu<select data-field='rebut'>"+getOptions(s.rebut)+"</select></label></div><div class='grid'><label class='field'>Mức chắc chắn<select data-field='confidence'><option value=''>Chọn mức</option>"+[1,2,3,4,5].map(function(n){return "<option value='"+n+"'"+(Number(s.confidence)===n?" selected":"")+">"+n+"/5</option>";}).join("")+"</select></label><label class='field'>Điểm yếu của lập luận<input data-field='weakness' value='"+esc(s.weakness||"")+"' placeholder='Nêu điều còn thiếu hoặc cách công tố phản bác'></label></div><button data-action='save-strategy' data-strategy-id='"+esc(it.id)+"'>Ghi vào chiến lược</button> <span class='small'>"+(s.saved?"Đã ghi nhận; có thể chỉnh sửa.":"Chưa ghi nhận.")+"</span></article>";}).join("")+"</div><div class='field'><label for='hypothesis'>Giả thuyết thay thế đang xem xét</label><select id='hypothesis'><option value=''>Chọn một giả thuyết cần kiểm tra</option>"+D.hypotheses.map(function(h){return "<option value='"+esc(h.id)+"'"+(state.hypothesis===h.id?" selected":"")+">"+esc(h.title)+"</option>";}).join("")+"</select></div>"+(state.hypothesis?hypothesisBlock(state.hypothesis):"")+"<button data-action='save-hypothesis'>Ghi nhận giả thuyết</button>");}
+function hypothesisBlock(id){var h=D.hypotheses.find(function(x){return x.id===id;});return h?"<div class='note'><b>Điều ủng hộ:</b> "+esc(h.supports||(h.basis||[]).join("; "))+"<br><b>Điều chưa giải thích:</b> "+esc(h.gaps||h.limitation)+"<br><b>Kiểm chứng cần thiết:</b> "+esc(h.test||"Đối chiếu với tài liệu liên kết; giả thuyết chưa phải kết luận.")+"</div>":"";}
+function renderCourt(){var phases=courtPhases;var p=phases[state.courtIndex];
+  if(!p)return panel("Phiên tòa đã kết thúc","<p>Hoàn tất bản bào chữa cuối để đề nghị Hội đồng xét xử đưa ra quyết định.</p><button data-tab='defense'>Hoàn thiện bản bào chữa</button>");
+  var options=unlockedEvidence().filter(function(e){return !p.issue||issueTags(e).indexOf(p.issue)>=0;});
+  var linkedStrategy={location:"device",forensic:"trace",witness:"statement",procedure:"chain"};
+  var priorStrategy=p.issue&&(state.strategies[p.issue]||state.strategies[linkedStrategy[p.issue]]);
+  var followUp=priorStrategy&&priorStrategy.saved?"<div class='callout'>Từ luận điểm đã lập trước đó, hãy kiểm tra "+esc(priorStrategy.support)+" và đối chiếu với "+esc(priorStrategy.rebut)+". Ghi lại câu hỏi mới dựa trên chính các tài liệu này.</div>":"";
+  return panel("Phiên tòa — "+(state.courtIndex+1)+"/"+phases.length, "<p class='badge'>"+esc(p.stage||p.title)+"</p><h3>"+esc(p.title)+"</h3><p>"+esc(p.prompt||p.task)+"</p>"+followUp+
+    "<div class='field'><label for='courtWitness'>Nhân chứng/nguồn cần hỏi</label><select id='courtWitness'><option value=''>Chọn người hoặc nguồn</option>"+D.witnesses.map(function(w){return "<option value='"+esc(w.id)+"'>"+esc(w.name+" — "+w.role)+"</option>";}).join("")+"</select></div>"+
+    "<div class='field'><label for='courtEvidence'>Tài liệu đưa ra đối chất</label><select id='courtEvidence'>"+options.map(function(e){return "<option value='"+esc(e.id)+"'>"+esc(e.id+" — "+e.title)+"</option>";}).join("")+"</select></div>"+
+    "<div class='field'><label for='courtQuestion'>Câu hỏi/điểm cần làm rõ</label><textarea id='courtQuestion' placeholder='Nêu chính xác điều cần xác minh, không khẳng định vượt quá chứng cứ.'>"+esc(state.examination[state.courtIndex]&&state.examination[state.courtIndex].question||"")+"</textarea></div>"+
+    "<button data-action='advance-court'>Ghi vào biên bản và tiếp tục</button><p class='small'>Biên bản giữ lại nội dung lựa chọn để giải thích trong bản án.</p>");
+}
+function renderDefense(){var f=state.final, opt=getOptions;
+  var fields=[["strongest","Chứng cứ buộc tội mạnh nhất"],["weakness","Điểm yếu của chứng cứ đó"],["contradiction","Chứng cứ mâu thuẫn đã kiểm chứng"],["gap","Khoảng thời gian/ mắt xích chưa được chứng minh"],["witness","Nhân chứng có nhận dạng hoặc hồi ức chưa chắc chắn"],["presence","Chứng cứ chỉ chứng minh sự hiện diện"],["act","Vì sao chưa chứng minh được hành vi"],["alternative","Giả thuyết thay thế hợp lý"],["chain","Vì sao chuỗi suy luận chưa đủ"]];
+  return panel("Bản bào chữa cuối", "<p>Hoàn thiện lập luận bằng tài liệu cụ thể. Kết quả xét xử đánh giá từng mắt xích và độ nhất quán, không cộng điểm tổng để quyết định.</p><div class='grid'>"+fields.map(function(row){var isHyp=row[0]==="alternative";return "<label class='field'>"+esc(row[1])+(isHyp?"<select data-final='"+row[0]+"'><option value=''>Chọn giả thuyết</option>"+D.hypotheses.map(function(h){return "<option value='"+esc(h.id)+"'"+(f[row[0]]===h.id?" selected":"")+">"+esc(h.title)+"</option>";}).join("")+"</select>":"<select data-final='"+row[0]+"'>"+opt(f[row[0]])+"</select>")+"</label>";}).join("")+"</div>"+
+    "<div class='field'><label for='finalNarrative'>Lập luận tổng hợp của luật sư</label><textarea id='finalNarrative' placeholder='Trình bày chuỗi lập luận: sự kiện được chứng minh, giới hạn, mâu thuẫn, khoảng trống và kết luận đề nghị.'>"+esc(f.narrative||"")+"</textarea></div>"+
+    "<button data-action='submit-defense'"+(state.submitted?" disabled":"")+">"+(state.submitted?"Đã nộp bản bào chữa":"Nộp bản bào chữa cho Tòa")+"</button>"+(state.submitted?" <button class='secondary' data-tab='judgment'>Xem bản án</button>":"")); }
+function renderJudgment(){if(!state.judgment)return panel("Chưa tuyên án","<p>Hoàn thành phiên tòa, sau đó nộp bản bào chữa cuối. Bản án sẽ giải thích cụ thể nhận định về tài liệu, lời khai, timeline và hành vi.</p><button data-tab='court'>Tiếp tục phiên tòa</button> <button class='secondary' data-tab='defense'>Mở bản bào chữa cuối</button>");
+  var j=state.judgment, accused=typeof D.facts.accused==="string"?D.facts.accused:D.facts.accused&&D.facts.accused.name||"Chưa ghi";var victim=typeof D.facts.victim==="string"?D.facts.victim:D.facts.victim&&D.facts.victim.name||"Chưa ghi";
+  return panel("Bản án của Tòa", "<div class='verdict'><p class='small'>TÒA ÁN NHÂN DÂN KHU VỰC VÂN HÒA<br>BẢN ÁN HÌNH SỰ SƠ THẨM SỐ 14/2026/HS-ST</p><h2>"+esc(j.title)+"</h2><p><b>Bị cáo:</b> "+esc(accused)+"</p><p><b>Nạn nhân:</b> "+esc(victim)+"</p><h3>Nội dung vụ án</h3><p>"+esc(D.facts.indictment)+"</p><h3>Nhận định của Hội đồng xét xử</h3>"+(j.findings||[]).map(function(x){return "<p>"+esc(x)+"</p>";}).join("")+"<h3>Lập luận cuối của luật sư</h3><p>"+esc(j.defenseText||"Không có lập luận cuối được ghi.")+"</p><h3>Về chứng cứ và lời khai</h3>"+(j.evidenceFindings||[]).map(function(x){return "<p>"+esc(x)+"</p>";}).join("")+"<h3>Về thời gian, hành vi và trách nhiệm hình sự</h3><p>"+esc(j.responsibility)+"</p><h3>QUYẾT ĐỊNH</h3><p><b>"+esc(j.disposition)+"</b></p><p>"+esc(j.rationale)+"</p><p class='small'>Bản án hư cấu, tự động tạo theo hồ sơ người chơi; không phải tư vấn pháp lý.</p></div><div class='toolbar'><button class='secondary' data-action='review'>XEM LẠI HỒ SƠ</button><button data-action='replay'>CHƠI LẠI S14</button></div>");}
+function render(){document.getElementById("caseTitle").textContent="APX Lawyer — Vụ án 014: "+(D.facts.caseTitle||D.facts.title||"Hồ sơ hình sự");
+  document.getElementById("caseSubtitle").textContent="Hình sự · Bào chữa · Hồ sơ "+(D.facts.year||"2026");
+  document.getElementById("phaseLabel").textContent=(tabs.find(function(t){return t[0]===state.tab;})||tabs[0])[1].toLocaleUpperCase("vi-VN");
+  renderTabs();metrics();
+  var fn={file:renderFile,evidence:renderEvidence,timeline:renderTimeline,witnesses:renderWitnesses,requests:renderRequests,strategy:renderStrategy,court:renderCourt,defense:renderDefense,judgment:renderJudgment}[state.tab];
+  app.innerHTML=fn();
+  if(state.tab==="evidence"){var s=document.getElementById("evidenceSearch");if(s){s.focus();s.setSelectionRange(s.value.length,s.value.length);}}
+  save();
+}
+function setTab(t){if(tabs.some(function(x){return x[0]===t;})){state.tab=t;save();render();window.scrollTo({top:0,behavior:"smooth"});}}
+function requestCategory(cat){var locked=D.evidence.filter(function(e){return e.category===cat&&state.unlocked.indexOf(e.id)<0;});
+  if(!locked.length)return notify("Đã nhận đủ tài liệu thuộc nhóm này.");
+  state.unlocked=state.unlocked.concat(locked.map(function(e){return e.id;}));state.requested.push(cat);state.log.push("Đã yêu cầu và nhận "+locked.length+" tài liệu: "+cat+".");render();notify("Đã ghi nhận yêu cầu tài liệu.");}
+function saveStrategy(button){var card=button.closest("[data-strategy]"),id=card.dataset.strategyId||card.dataset.strategy,fields={};card.querySelectorAll("[data-field]").forEach(function(el){fields[el.dataset.field]=el.value.trim();});
+  if(!fields.support||!fields.rebut||!fields.confidence||!fields.weakness){notify("Hãy ghi cả hai phía chứng cứ, mức chắc chắn và điểm yếu.");return;}
+  fields.saved=true;state.strategies[id]=fields;state.log.push("Đã ghi chiến lược: "+(issues.find(function(i){return i.id===id;})||{}).title);render();notify("Lập luận đã được ghi vào chiến lược bào chữa.");}
+function readWitness(id){if(state.statements.indexOf(id)<0)state.statements.push(id);var w=D.witnesses.find(function(x){return x.id===id;});if(w)(w.evidenceIds||[]).forEach(function(e){if(evidenceById(e)&&state.unlocked.indexOf(e)<0)state.unlocked.push(e);});save();render();notify("Nội dung đã được ghi vào hồ sơ.");}
+function advanceCourt(){var p=courtPhases[state.courtIndex], witness=document.getElementById("courtWitness").value, evidence=document.getElementById("courtEvidence").value, question=document.getElementById("courtQuestion").value.trim();
+  if(!evidence||!question){notify("Chọn tài liệu và ghi điểm cần làm rõ trước khi tiếp tục.");return;}
+  state.examination[state.courtIndex]={phase:p.id,witness:witness,evidence:evidence,question:question};
+  if(witness&&state.statements.indexOf(witness)<0)readWitness(witness);
+  state.log.push("Phiên tòa: "+p.title+"; đối chiếu "+evidence+(witness?"; hỏi "+witness:"")+".");
+  state.courtIndex+=1;save();render();notify("Nội dung đã được ghi vào biên bản phiên tòa.");}
+function issueAssessment(){var completed=Object.keys(state.strategies).filter(function(k){var s=state.strategies[k],support=evidenceById(s&&s.support),rebut=evidenceById(s&&s.rebut);return s&&s.saved&&support&&rebut&&s.support!==s.rebut&&support.source!==rebut.source&&support.issues.some(function(tag){return rebut.issues.indexOf(tag)>=0;})&&s.weakness.trim().length>=12;});
+  var anchors={};completed.forEach(function(k){var s=state.strategies[k];var a=evidenceById(s.support),b=evidenceById(s.rebut);if(a&&b){(a.issues||[]).concat(b.issues||[]).forEach(function(i){anchors[i]=true;});}});
+  var crossChecked=Object.keys(state.examination).filter(function(k){var x=state.examination[k];return x&&x.evidence&&x.question.length>=12;}).length;
+  var unsupported=completed.filter(function(k){var s=state.strategies[k];return Number(s.confidence)>=4&&s.weakness.trim().length<24;}).length;
+  return {completed:completed,anchors:anchors,crossChecked:crossChecked,unsupported:unsupported,
+    strong:completed.length>=6&&["time","identity","forensic","witness","chain"].filter(function(x){return anchors[x];}).length>=4&&crossChecked>=7&&state.hypothesis!==""&&state.final.narrative.trim().length>=180,
+    moderate:completed.length>=3&&crossChecked>=4&&state.final.narrative.trim().length>=90};}
+function makeJudgment(){var a=issueAssessment(),f=state.final,selected=[f.strongest,f.weakness,f.contradiction,f.gap,f.witness,f.presence,f.act,f.chain].map(evidenceById).filter(Boolean);
+  var evidenceFindings=[];
+  var perIssue={};selected.forEach(function(e){(e.issues||[]).forEach(function(k){perIssue[k]=(perIssue[k]||0)+1;});});
+  Object.keys(perIssue).forEach(function(k){evidenceFindings.push("Đối với vấn đề "+k+", Tòa đã xem xét "+perIssue[k]+" tài liệu do luật sư viện dẫn. Giá trị của từng tài liệu được giới hạn ở nội dung, nguồn và điều kiện thu thập thể hiện trong hồ sơ.");});
+  selected.forEach(function(e){evidenceFindings.push(e.id+" — "+e.title+" ("+e.reliability+"): "+e.proves+" Giới hạn: "+e.doesNotProve);});
+  if(!evidenceFindings.length)evidenceFindings.push("Bản bào chữa không chỉ rõ đủ tài liệu cụ thể để Tòa kiểm tra độc lập từng nhận định.");
+  Object.keys(state.examination).forEach(function(index){var x=state.examination[index],p=courtPhases[Number(index)];if(p&&x&&x.evidence){var cited=evidenceById(x.evidence);if(cited)evidenceFindings.push("Tại phần "+p.title+", luật sư dùng "+cited.id+" — "+cited.title+" để yêu cầu làm rõ: "+x.question);}});
+  var outcomes=D.outcomes||[],findOutcome=function(id){return outcomes.find(function(x){return x.id===id;});},outcome;
+  if(a.strong&&a.unsupported===0)outcome=findOutcome("O1");
+  else if(a.moderate&&a.completed.length>=5&&a.anchors.identity&&a.anchors.forensic)outcome=findOutcome("O5");
+  else if(a.completed.length>=3&&a.crossChecked>=4&&a.anchors.forensic&&!a.anchors.time&&state.requested.some(function(c){return /physical|vật chất/i.test(c);}))outcome=findOutcome("O4");
+  else if(a.completed.length>=3&&a.crossChecked>=4&&(!a.anchors.time||!a.anchors.chain||a.anchors.procedure))outcome=findOutcome("O3");
+  else if(a.completed.length>=2&&a.anchors.identity&&a.anchors.forensic)outcome=findOutcome("O2");
+  else if(a.completed.length<2||a.unsupported>=2||f.narrative.trim().length<40)outcome={id:"serious-failure",title:"BÀO CHỮA THẤT BẠI NGHIÊM TRỌNG",result:"Nhánh kết thúc bất lợi do lập luận không được nâng đỡ đầy đủ.",rationale:"Bản bào chữa bỏ sót các mắt xích trọng yếu, khẳng định vượt quá tài liệu hoặc không giải thích các mâu thuẫn do chính mình tạo ra. Tòa vẫn phải đánh giá từng chứng cứ, nhưng chiến lược này không làm suy giảm đáng kể sức nặng của chuỗi buộc tội.",findings:["Tòa không chấp nhận kết luận thay cho chứng cứ. Các lập luận thiếu trích dẫn, không nêu giới hạn hoặc mâu thuẫn với hồ sơ không đủ sức làm thay đổi nhận định."],responsibility:"Các chứng cứ còn lại được xem xét theo giá trị riêng; việc bào chữa không đạt yêu cầu không tự nó chứng minh tội phạm."};
+  else outcome=findOutcome("O6");
+  if(!outcome)outcome=findOutcome("O1")||outcomes[0]||{id:"unavailable",title:"Chưa xác định",result:""};
+  var strategyTitles=a.completed.map(function(k){return (issues.find(function(x){return x.id===k;})||{}).title||k;});
+  var acceptedTopics=a.completed.map(function(k){return (issues.find(function(x){return x.id===k;})||{}).title||k;});
+  var consideredTopics=issues.filter(function(x){return a.completed.indexOf(x.id)<0;}).map(function(x){return x.title;});
+  var findings=[
+    "Hội đồng xét xử phân biệt sự hiện diện gần khu vực, quan hệ với nạn nhân và việc thực hiện hành vi. Không yếu tố riêng lẻ nào được coi tự động chứng minh yếu tố còn lại.",
+    "Chiến lược bào chữa được ghi nhận ở "+a.completed.length+"/7 vấn đề: "+(strategyTitles.join("; ")||"chưa có luận điểm hoàn chỉnh")+".",
+    "Các lập luận có cặp tài liệu khác nguồn và giới hạn nêu rõ được Hội đồng xét xử xem xét: "+(acceptedTopics.join("; ")||"chưa có lập luận được kiểm chứng chéo")+". Các hướng chưa được nâng đỡ đủ bằng tài liệu: "+(consideredTopics.join("; ")||"không có")+".",
+    "Biên bản phiên tòa ghi nhận "+a.crossChecked+" lượt đối chiếu có câu hỏi và tài liệu cụ thể. Số lượt không thay thế chất lượng nội dung.",
+    "Người chơi đã mở "+state.unlocked.length+"/"+D.evidence.length+" chứng cứ; việc chưa xem một tài liệu không tự chứng minh nội dung của tài liệu đó."
+  ];
+  if(state.statements.length)findings.push("Luật sư đã đọc lời khai của "+state.statements.length+"/"+D.witnesses.length+" người. Mâu thuẫn lời khai cần được phân biệt với sai số trí nhớ, góc nhìn và ảnh hưởng từ cách lấy lời khai.");
+  if(state.hypothesis){var h=D.hypotheses.find(function(x){return x.id===state.hypothesis;});if(h)findings.push("Giả thuyết thay thế được ghi nhận: "+h.title+". Đây là hướng cần kiểm tra, không phải kết luận về một người khác.");}
+  return {id:outcome.id,title:outcome.title,disposition:outcome.disposition||outcome.result,defenseText:f.narrative,
+    findings:findings.concat(outcome.findings||[outcome.rationale||"Tòa đánh giá riêng từng chứng cứ và lời khai; không suy từ một tình tiết đơn lẻ sang kết luận về hành vi."]),
+    evidenceFindings:evidenceFindings,
+    responsibility:outcome.responsibility||outcome.result,rationale:outcome.rationale,
+    metrics:{issues:a.completed.length,anchors:Object.keys(a.anchors),crossChecked:a.crossChecked,examinedWitnesses:state.statements.length}};
+}
+function submitDefense(){if(state.courtIndex<courtPhases.length){notify("Hoàn tất các phần phiên tòa trước khi nộp.");return;}
+  var required=["strongest","weakness","contradiction","gap","witness","presence","act","alternative","chain"];
+  var missing=required.filter(function(k){return !state.final[k];});
+  if(missing.length||!state.final.narrative||state.final.narrative.trim().length<40){notify("Hoàn thành các mục của bản bào chữa cuối bằng tài liệu cụ thể.");return;}
+  state.submitted=true;state.judgment=makeJudgment();state.tab="judgment";state.log.push("Đã nộp bản bào chữa; Tòa ban hành bản án "+state.judgment.id+".");save();render();}
+function replay(){try{localStorage.removeItem(storeKey);}catch(e){console.error("Could not remove S14 save.",e);notify("Không thể xóa tiến trình đã lưu.");return;}window.location.reload();}
+document.addEventListener("click",function(ev){var t=ev.target.closest("[data-tab]");if(t){setTab(t.dataset.tab);return;}
+  var b=ev.target.closest("[data-action]");if(!b)return;
+  if(b.dataset.action==="request-category")return requestCategory(b.dataset.category);
+  if(b.dataset.action==="save-strategy")return saveStrategy(b);
+  if(b.dataset.action==="read-witness")return readWitness(b.dataset.witnessId);
+  if(b.dataset.action==="advance-court")return advanceCourt();
+  if(b.dataset.action==="save-hypothesis"){state.hypothesis=document.getElementById("hypothesis").value;state.log.push("Đã ghi nhận giả thuyết thay thế để kiểm tra.");save();render();return notify("Giả thuyết đã được ghi vào hồ sơ.");}
+  if(b.dataset.action==="submit-defense")return submitDefense();
+  if(b.dataset.action==="review"){state.tab="file";save();render();return;}
+  if(b.dataset.action==="replay")return replay();
+});
+document.addEventListener("change",function(ev){if(ev.target.matches("[data-final]")){state.final[ev.target.dataset.final]=ev.target.value;save();}
+  if(ev.target.id==="hypothesis"){state.hypothesis=ev.target.value;save();}
+  if(ev.target.id==="evidenceCategory")render();
+});
+document.addEventListener("input",function(ev){if(ev.target.id==="evidenceSearch"){var value=ev.target.value;render();var s=document.getElementById("evidenceSearch");s.value=value;s.focus();}if(ev.target.id==="finalNarrative"){state.final.narrative=ev.target.value;save();}});
+document.addEventListener("toggle",function(ev){if(ev.target.matches("details[data-evidence]")&&ev.target.open){var id=ev.target.dataset.evidence;if(state.openedEvidence.indexOf(id)<0)state.openedEvidence.push(id);save();}},true);
+load();render();
+})();
+</script>
+</body>
+</html>
