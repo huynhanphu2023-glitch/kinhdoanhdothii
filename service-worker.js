@@ -1,6 +1,6 @@
 "use strict";
 
-var CACHE_NAME = "apx-pwa-shell-v33";
+var CACHE_NAME = "apx-pwa-shell-v34";
 var APP_SHELL = [
   "./",
   "./index.html",
@@ -42,6 +42,8 @@ var APP_SHELL = [
   "./js/cases/case_011.html",
   "./js/cases/case_012.js",
   "./js/cases/case_012.html",
+  "./js/cases/case_013.js",
+  "./js/cases/case_013.html",
   "./js/lawyer-cases.js",
   "./js/questData.js",
   "./js/questSystem.js",
