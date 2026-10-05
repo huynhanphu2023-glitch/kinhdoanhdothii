@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Phòng trọ Sài Gòn</title><desc id="desc">Dãy phòng nhỏ dưới ánh đèn thành phố về đêm.</desc>
+  <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#142a36"/><stop offset="1" stop-color="#263d49"/></linearGradient><linearGradient id="wall" x2="0" y2="1"><stop stop-color="#d5bd8c"/><stop offset="1" stop-color="#8c715b"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#sky)"/><circle cx="520" cy="65" r="28" fill="#e8d69d" opacity=".88"/><path d="M0 220h640v140H0z" fill="#1b2c34"/><path d="M95 160 210 100l116 60v149H95z" fill="url(#wall)"/><path d="M80 163 210 91l132 72-16 15-116-62-113 62z" fill="#625548"/><rect x="119" y="192" width="44" height="58" rx="3" fill="#88b9b6"/><rect x="181" y="190" width="103" height="119" fill="#34444a"/><rect x="194" y="203" width="77" height="93" fill="#1b2930"/><path d="M211 296v-57a17 17 0 0 1 34 0v57" fill="#c8ad7d"/><path d="M60 310h300" stroke="#e3bf79" stroke-width="5"/><path d="M400 290h240M430 260v100M535 242v118" stroke="#364c54" stroke-width="18"/>
+</svg>

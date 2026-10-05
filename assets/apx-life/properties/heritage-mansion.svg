@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">Dinh thự Heritage</title>
+  <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#101f2b"/><stop offset="1" stop-color="#485b61"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#sky)"/><circle cx="500" cy="65" r="25" fill="#dbc17c"/>
+  <path d="M0 286h640v74H0z" fill="#15242b"/><path d="M97 176h446v111H97z" fill="#35464b" stroke="#9c9d88" stroke-width="3"/>
+  <path d="m78 178 52-66 52 66v-29l51-66 51 66v-28l56-73 56 73v28l51-66 51 66v29l52-66 52 66z" fill="#ad9160"/>
+  <g fill="#9bbdb2"><path d="M131 199h49v48h-49zM205 199h49v48h-49zM386 199h49v48h-49zM460 199h49v48h-49z"/></g>
+  <path d="M278 213h84v74h-84z" fill="#d7bd78"/><path d="M0 287h640" stroke="#d7bd78" stroke-width="2" opacity=".7"/>
+</svg>

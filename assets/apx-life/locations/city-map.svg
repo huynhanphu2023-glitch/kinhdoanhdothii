@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="title">
+  <title id="title">Bản đồ minh họa thành phố APX bên sông</title>
+  <defs><linearGradient id="ground" x2="0" y2="1"><stop stop-color="#30464a"/><stop offset="1" stop-color="#24383d"/></linearGradient></defs>
+  <rect width="960" height="600" fill="url(#ground)"/>
+  <path d="M-40 100 1000 510M-20 540 1000 95M200-30l490 670M680-40 300 630" stroke="#192a30" stroke-width="58" fill="none"/>
+  <path d="M-40 100 1000 510M-20 540 1000 95M200-30l490 670M680-40 300 630" stroke="#71817a" stroke-width="3" stroke-dasharray="13 14" fill="none" opacity=".6"/>
+  <path d="M-40 393Q170 330 331 398t330 1q165-42 339 8v140q-190-43-337 3t-334-5q-173-43-379 12z" fill="#28555c" stroke="#609091" stroke-width="5"/>
+  <path d="M112 369q82-30 169-2m355 18q71-34 151-8" stroke="#d1bb79" stroke-width="9" opacity=".65"/>
+  <g fill="#52675c" stroke="#8d9a78" stroke-width="3"><path d="m58 49 115 18-27 94-114-20zM391 54l125-20 30 101-126 24zM756 155l143-21 28 103-139 22zM364 440l115-17 34 110-113 22zM725 427l133 20-33 96-126-24z"/></g>
+  <g fill="#42595c" stroke="#778985" stroke-width="2"><path d="m210 62 116 19-23 82-113-17zM555 190l132-25 24 100-135 21zM55 239l130-26 31 98-134 29zM522 424l132 18-28 93-132-18zM825 303l107 17-23 76-103-20z"/></g>
+  <path d="M0 295q215-90 403 4t557-11" stroke="#d5bd79" stroke-width="4" fill="none" opacity=".42"/>
+</svg>
