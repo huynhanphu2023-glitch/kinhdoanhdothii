@@ -105,13 +105,8 @@ window.APXPages = window.APXPages || {};
   function profileView() {
     var p = profile;
     if (!p) return '<section class="panel community-empty"><button class="button" data-action-community="back" type="button">← Quay lại</button><p role="status">' + esc(status.profile || "Đang tải hồ sơ…") + '</p></section>';
-    var skin = window.APXWardrobe && window.APXWardrobe.findSkin
-      ? (window.APXWardrobe.findSkin(p.skin_id) || window.APXWardrobe.findSkin("skin-base-dark"))
-      : null;
-    var avatar = (skin && skin.src) || p.avatar_url || "";
-    var characterArt = skin
-      ? '<div class="public-profile-character"><img src="' + esc(skin.src) + '" alt="' + esc(skin.name + ' · ' + (p.display_name || 'Người chơi')) + '"></div>'
-      : '<i class="community-avatar large public-profile-avatar">' + safeAvatar(p.avatar_url, p.display_name) + '</i>';
+    var avatar = p.avatar_url || "";
+    var characterArt = '<i class="community-avatar large public-profile-avatar">' + safeAvatar(avatar, p.display_name) + '</i>';
     var playerCode = String(p.character_id || "").replace(/-/g, "").slice(0, 8).toUpperCase();
     var joined = p.joined_at ? new Date(p.joined_at).toLocaleDateString("vi-VN") : "--";
     var companies = Array.isArray(p.companies) ? p.companies : [];
