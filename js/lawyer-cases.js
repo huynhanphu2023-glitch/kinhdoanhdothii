@@ -409,7 +409,7 @@ window.APXPages = window.APXPages || {};
       progress.pendingAnswers[questionId] = choice.id;
       return persistAndRender("Đã chọn đáp án. Bạn có thể đổi lựa chọn trước khi xác nhận.");
     }
-    return recordAnswer(caseData, progress, question, choice);
+    return recordAnswer(caseData, progress, question, choice.id);
   }
 
   function confirmAnswer(caseData, questionId) {
