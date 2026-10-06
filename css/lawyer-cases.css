@@ -68,6 +68,7 @@
 .lawyer-case-choice-option { display: grid; align-content: start; gap: 4px; min-width: 0; }
 .lawyer-case-choice { display: flex; min-width: 0; align-items: flex-start; gap: 9px; min-height: 56px; padding: 10px; border: 1px solid var(--apx-line); border-radius: 12px; color: var(--apx-text); text-align: left; background: rgba(255,255,255,.5); cursor: pointer; transition: border-color .16s ease, transform .16s ease, background .16s ease; }
 .lawyer-case-choice:hover:not(:disabled) { border-color: var(--apx-gold); transform: translateY(-1px); }
+.lawyer-case-choice.is-research-locked { border-style: dashed; }
 .lawyer-case-choice > span { display: grid; flex: 0 0 24px; height: 24px; place-items: center; border-radius: 8px; color: #fff; background: var(--apx-gold); font-size: 11px; font-weight: 800; }
 .lawyer-case-choice > strong { padding-top: 3px; font-size: 12px; font-weight: 600; line-height: 1.5; }
 .lawyer-case-choice.is-selected { border-color: var(--apx-teal); background: rgba(113,129,106,.15); }
