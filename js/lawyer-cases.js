@@ -284,10 +284,20 @@ window.APXPages = window.APXPages || {};
   function migrateProgress(caseData, progress) {
     if (!progress || progress.status !== "active") return;
     var oldMechanicsVersion = Number(progress.mechanicsVersion) || 1;
-    if (oldMechanicsVersion >= Number(caseData.mechanicsVersion)) return;
     if (!progress.answers || typeof progress.answers !== "object" || Array.isArray(progress.answers)) progress.answers = {};
     if (!progress.pendingAnswers || typeof progress.pendingAnswers !== "object" || Array.isArray(progress.pendingAnswers)) {
       progress.pendingAnswers = {};
+    }
+    if (oldMechanicsVersion >= Number(caseData.mechanicsVersion)) {
+      if (!(Array.isArray(caseData.investigationActions) && caseData.investigationActions.length)) {
+        var nextUnansweredQuestion = caseData.questions.findIndex(function (question) {
+          return !progress.answers[question.id];
+        });
+        progress.currentQuestion = nextUnansweredQuestion < 0
+          ? Math.max(0, caseData.questions.length - 1)
+          : nextUnansweredQuestion;
+      }
+      return;
     }
     var currentQuestionIds = Object.create(null);
     caseData.questions.forEach(function (question) { currentQuestionIds[question.id] = true; });
@@ -850,7 +860,9 @@ window.APXPages = window.APXPages || {};
       var choice = question.choices.find(function (item) { return item.id === button.dataset.choiceId; });
       if (!choice) return;
       var missing = missingResearch(caseData, progress, choice);
-      button.disabled = Boolean(progress.answers[question.id]) || missing.length > 0;
+      button.disabled = Boolean(progress.answers[question.id]);
+      button.classList.toggle("is-research-locked", missing.length > 0);
+      button.title = missing.length ? "Hãy đọc căn cứ trước: " + missing.join(" · ") : "";
       var hint = document.querySelector('[data-law-case-research="' + button.dataset.choiceId + '"]');
       if (hint) hint.textContent = missing.length ? "Cần đọc: " + missing.join(" · ") : "";
     });
@@ -939,7 +951,7 @@ window.APXPages = window.APXPages || {};
     var choices = question.choices.map(function (choice, index) {
       var letter = String.fromCharCode(65 + index);
       var missing = missingResearch(caseData, progress, choice);
-      return '<div class="lawyer-case-choice-option"><button class="lawyer-case-choice' + (selected === choice.id ? ' is-selected' : '') + '" type="button" data-law-case-action="choose" data-law-case-choice data-case-id="' + escapeHTML(caseData.id) + '" data-question-id="' + escapeHTML(question.id) + '" data-choice-id="' + escapeHTML(choice.id) + '"' + (answered || missing.length ? " disabled" : "") + '><span>' + letter + '</span><strong>' + escapeHTML(choice.text) + '</strong></button><small class="lawyer-case-research-hint" data-law-case-research="' + escapeHTML(choice.id) + '">' + (missing.length ? "Cần đọc: " + escapeHTML(missing.join(" · ")) : "") + '</small></div>';
+      return '<div class="lawyer-case-choice-option"><button class="lawyer-case-choice' + (selected === choice.id ? ' is-selected' : '') + (missing.length ? ' is-research-locked' : '') + '" type="button" data-law-case-action="choose" data-law-case-choice data-case-id="' + escapeHTML(caseData.id) + '" data-question-id="' + escapeHTML(question.id) + '" data-choice-id="' + escapeHTML(choice.id) + '"' + (answered ? " disabled" : "") + (missing.length ? ' title="Hãy đọc căn cứ trước: ' + escapeHTML(missing.join(" · ")) + '"' : "") + '><span>' + letter + '</span><strong>' + escapeHTML(choice.text) + '</strong></button><small class="lawyer-case-research-hint" data-law-case-research="' + escapeHTML(choice.id) + '">' + (missing.length ? "Cần đọc: " + escapeHTML(missing.join(" · ")) : "") + '</small></div>';
     }).join("");
     var last = progress.currentQuestion === caseData.questions.length - 1;
     var nextAction = caseData.confirmAnswers && !answered
